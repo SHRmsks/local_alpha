@@ -1,21 +1,25 @@
-package api
+package Api
 
-
-import(
-    "log"
+import (
+	"encoding/json"
+	"log"
+	"net/http"
 )
 
-
-type user struct{
-    userName string 
-    password string
-    userID int64
+type user struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+	UserID   int64  `json:"userID"`
 }
 
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("login handler is called")
+	// parser logic
+	var user user
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		log.Println("Error on getting user information")
+	}
 
-func loginHandler(w http.ResponseWriter, r *http.Request){
-    log.Println("login handler is called")
-
-
-    w.Write([]byte("login handler"))
+	w.Write([]byte("login handler"))
 }
