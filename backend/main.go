@@ -23,6 +23,7 @@ func main() {
 	}
 	log.Println("Environment variables loaded successfully")
 	port := os.Getenv("PORT")
+
 	db := os.Getenv("DBURL")
 	r := chi.NewRouter()
 	server := &http.Server{
@@ -40,14 +41,17 @@ func main() {
 		log.Fatal("Error connecting to database")
 	}
 
-	log.Println("Database connected successfully", client)
-
 	// Initialize routes
 
 	r.Use(middleware.Logger)
 	// main routes
-	r.Post("/", Api.LoginHandler)
+	r.Use(Api.MiddleWare(client.Database("User")))
+
+	r.Post("/login", Api.LoginHandler)
 
 	log.Println("Server is running on port", port)
-	server.ListenAndServe()
+
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("Server failed: %v", err)
+	}
 }
