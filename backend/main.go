@@ -57,7 +57,7 @@ func main() {
 
 	r.Use(middleware.Logger)
 	// middleWare 
-	r.Use(Api.MiddleWare(client.Database("User")))
+	
 	// Cors set up
 	r.Group(func(publicURL chi.Router) {
 		publicURL.Use(cors.Handler(
@@ -83,6 +83,7 @@ func main() {
 			),
 			
 			)
+			privateURL.Use(Api.MiddleWare(client.Database("User")))
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {
 		
 	})
