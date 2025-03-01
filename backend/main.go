@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"log"
 	"net/http"
@@ -9,8 +10,6 @@ import (
 	"time"
 
 	"github.com/go-chi/cors"
-
-	"fmt"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -56,14 +55,14 @@ func main() {
 	// Initialize routes
 
 	r.Use(middleware.Logger)
-	// middleWare 
-	
+	// middleWare
+
 	// Cors set up
 	r.Group(func(publicURL chi.Router) {
 		publicURL.Use(cors.Handler(
 			cors.Options{
 				AllowedOrigins:   []string{"*"}, // alllow any public urls
-				AllowedMethods:   []string{"GET", "POST","OPTIONS"},
+				AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 				AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 				AllowCredentials: true,
 				MaxAge:           300,
@@ -74,27 +73,29 @@ func main() {
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT)}, // alllow any public urls
-					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE","OPTIONS"},
+					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT)}, // alllow any public url
+					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 					AllowCredentials: true,
 					MaxAge:           300,
 				},
 			),
-			
 			)
-			privateURL.Use(Api.MiddleWare(client.Database("User")))
+			privateURL.Use(Api.MiddleWareOAUTH)
+			privateURL.Use(Api.MiddleWareLOGIN(client.Database("User")))
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {
-		
-	})
+
+			})
+			privateURL.Options("/callback", func(w http.ResponseWriter, r *http.Request) {
+
+			})
 			privateURL.Post("/login", Api.LoginHandler)
+			privateURL.Get("/callback", Api.CallbackHandler)
+
 		},
 	)
 
 	// main routes
-	
-
-	
 
 	log.Println("Server is running on port", port)
 

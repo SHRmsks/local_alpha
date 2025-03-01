@@ -2,16 +2,27 @@ package Api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 type user struct {
 	UserName string `bson:"UserName"`
 	Password string `bson:"Password"`
+}
+
+var config = &oauth2.Config{
+	ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
+	ClientSecret: "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",
+	RedirectURL:  "http://localhost:5050/callback",
+	Endpoint:     google.Endpoint,
+	Scopes:       []string{"openid", "profile", "email"},
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,4 +76,56 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		"userID":    uuid,
 		"sessionID": session.ID(),
 	})
+}
+
+func CallbackHandler(w http.ResponseWriter, r *http.Request) {
+
+	log.Println("callback handler is called")
+	context := r.Context()
+
+	tempCode := r.URL.Query().Get("code")
+	if tempCode == "" {
+		http.Error(w, "Error with Google Server", http.StatusBadRequest)
+		return
+	}
+
+	token, err := config.Exchange(context, tempCode)
+
+	if err != nil {
+		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
+		return
+	}
+
+	// get the token and use it for authentication from Google Server
+	idToken := token.Extra("id_token").(string)
+	client := config.Client(context, token)
+	res, err := client.Get(fmt.Sprintf("https://oauth2.googleapis.com/tokeninfo?id_token=%v", idToken))
+	if err != nil {
+		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
+		return
+	}
+	defer res.Body.Close()
+
+	var googleInfo map[string]interface{}
+	err = json.NewDecoder(res.Body).Decode(&googleInfo)
+	if err != nil {
+		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
+		return
+	}
+	email, ok := googleInfo["email"]
+	if !ok {
+		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
+		return
+	}
+	log.Println("Token info: ", email)
+
+	http.SetCookie(
+		w, &http.Cookie{
+			Name:     "session_token",
+			Value:    email.(string),
+			HttpOnly: true,
+			MaxAge:   86400,
+			Secure:   false,
+		})
+
 }

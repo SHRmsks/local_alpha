@@ -19,7 +19,23 @@ type DBcontext struct {
 	UserCtxt UserContext
 }
 
-func MiddleWare(db *mongo.Database) func(http.Handler) http.Handler {
+// using Google or LinkedIn instead
+func MiddleWareOAUTH(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("middlewareOAUTH is working")
+		cookie, err := r.Cookie("session_token")
+		if err != nil {
+			log.Printf("Not signed in yet")
+			return
+		}
+		userEmail := cookie.Value
+		log.Println("user is found", userEmail)
+
+	})
+}
+
+// only pass here if user is using traditional username and password
+func MiddleWareLOGIN(db *mongo.Database) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Println("middleWare is working")
