@@ -30,7 +30,7 @@ func MiddleWareOAUTH(next http.Handler) http.Handler {
 		}
 		userEmail := cookie.Value
 		log.Println("user is found", userEmail)
-
+		http.Redirect(w, r, "http://localhost:3000/dashBoard", http.StatusFound)
 	})
 }
 
