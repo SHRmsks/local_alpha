@@ -22,6 +22,7 @@ import (
 func main() {
 	// load configuration
 	err := godotenv.Load()
+
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -81,12 +82,14 @@ func main() {
 				},
 			),
 			)
+			privateURL.Use(Api.AuthenticateProtector)
 			privateURL.Use(Api.MiddleWareOAUTH)
 			privateURL.Use(Api.MiddleWareLOGIN(client.Database("User")))
+
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {
 
 			})
-			privateURL.Options("/callback", func(w http.ResponseWriter, r *http.Request) {
+			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {
 
 			})
 			privateURL.Post("/login", Api.LoginHandler)

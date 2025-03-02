@@ -127,5 +127,5 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   86400,
 			Secure:   false,
 		})
-
+		http.Redirect(w, r, "http://localhost:3000/dashBoard", http.StatusSeeOther)
 }
