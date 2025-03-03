@@ -1,11 +1,11 @@
 "use client"
 import Sidebar from "@/components/sidebar/sidebar";
 import "@/app/global.css"
-const DashBoard =  ()=>{
+const Dashboard =  ()=>{
     return (
         <div>
             <Sidebar />
         </div>
     )
 }
-export default DashBoard
+export default Dashboard
