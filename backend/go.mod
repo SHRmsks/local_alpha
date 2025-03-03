@@ -11,6 +11,11 @@ require (
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	golang.org/x/oauth2 v0.27.0 // indirect
+)
+
+require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/lpernett/godotenv v0.0.0-20230527005122-0de1d4c5ef5e
