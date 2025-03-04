@@ -92,8 +92,10 @@ func main() {
 			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {
 
 			})
+			privateURL.Options("/linkedin/callback", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Post("/login", Api.LoginHandler)
 			privateURL.Get("/callback", Api.CallbackHandler)
+			privateURL.Get("/linkedin/callback", Api.LinkedInCallbackHandler)
 
 		},
 	)
