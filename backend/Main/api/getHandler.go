@@ -14,12 +14,23 @@ import (
 	"Main/models"
 )
 
-var config = &oauth2.Config{
+var googleconfig = &oauth2.Config{
 	ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
 	ClientSecret: "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",
 	RedirectURL:  "http://localhost:5050/callback",
 	Endpoint:     google.Endpoint,
 	Scopes:       []string{"openid", "profile", "email"},
+}
+var linkedInconfig = &oauth2.Config{
+	ClientID:     "77nme6nzlhmnlv",
+	ClientSecret: "WPL_AP1.U7xavECHgwKAnUkK.zu3mHw==",
+	Scopes:       []string{"r_liteprofile", "r_emailaddress"},
+	RedirectURL:  "http://localhost:5050/linkedin/callback",
+	Endpoint: oauth2.Endpoint{
+		AuthURL:   "https://www.linkedin.com/oauth/v2/authorization",
+		TokenURL:  "https://www.linkedin.com/oauth/v2/accessToken",
+		AuthStyle: oauth2.AuthStyleInParams,
+	},
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +86,27 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// this is for the linkedin server
+func LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("linkedIn callback handler is called")
+	context := r.Context()
+	tempCode := r.URL.Query().Get("code")
+	if tempCode == "" {
+		http.Error(w, "Error with LinkedIn Server", http.StatusBadRequest)
+		return
+	}
+	token, err := linkedInconfig.Exchange(context, tempCode)
+	if err != nil {
+		log.Printf("LinkedIn token exchange error: %v", err)
+		http.Error(w, "Error with LinkedIn Server", http.StatusInternalServerError)
+		return
+	}
+	idToken := token.Extra("id_token").(string)
+	log.Println("linkedin token", idToken)
+
+}
+
+// this is for google server
 func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("callback handler is called")
@@ -86,7 +118,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := config.Exchange(context, tempCode)
+	token, err := googleconfig.Exchange(context, tempCode)
 
 	if err != nil {
 		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
@@ -95,7 +127,7 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// get the token and use it for authentication from Google Server
 	idToken := token.Extra("id_token").(string)
-	client := config.Client(context, token)
+	client := googleconfig.Client(context, token)
 	res, err := client.Get(fmt.Sprintf("https://oauth2.googleapis.com/tokeninfo?id_token=%v", idToken))
 	if err != nil {
 		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
