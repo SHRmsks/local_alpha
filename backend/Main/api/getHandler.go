@@ -27,7 +27,7 @@ var googleconfig = &oauth2.Config{
 var linkedInconfig = &oauth2.Config{
 	ClientID:     "77nme6nzlhmnlv",
 	ClientSecret: "WPL_AP1.U7xavECHgwKAnUkK.zu3mHw==",
-	Scopes:       []string{"r_liteprofile", "r_emailaddress"},
+	Scopes:       []string{"openid", "profile", "email"},
 	RedirectURL:  "http://localhost:5050/linkedin/callback",
 	Endpoint: oauth2.Endpoint{
 		AuthURL:   "https://www.linkedin.com/oauth/v2/authorization",
@@ -104,8 +104,51 @@ func LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error with LinkedIn Server", http.StatusInternalServerError)
 		return
 	}
-	idToken := token.Extra("id_token").(string)
+	idToken := token.AccessToken
 	log.Println("linkedin token", idToken)
+	// verify the token
+	var linkedinInfo map[string]interface{}
+
+	req, err := http.NewRequest("GET", "https://api.linkedin.com/v2/userinfo", nil)
+	if err != nil {
+		http.Error(w, "Error with Signing in LinkedIn Server", http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", idToken))
+
+	// constructing http request for finding user info
+	client := &http.Client{}
+	res, err := client.Do(req)
+
+	if err != nil {
+		http.Error(w, "Error with Signing in LinkedIn Server", http.StatusInternalServerError)
+		return
+	}
+	defer res.Body.Close()
+
+	err = json.NewDecoder(res.Body).Decode(&linkedinInfo)
+	if err != nil {
+		http.Error(w, "Error with Signing in LinkedIn Server", http.StatusInternalServerError)
+		return
+	}
+
+	// send response in JSON format
+
+	email := linkedinInfo["email"].(string)
+	log.Println("email", email)
+	// store as Cookie
+
+	http.SetCookie(
+		w, &http.Cookie{
+			Name:     "session_token",
+			Value:    email,
+			Path:     "/",
+			HttpOnly: true,
+			MaxAge:   86400,
+			Secure:   false,
+		})
+
+	http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusSeeOther)
 
 }
 
@@ -156,8 +199,10 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 			Name:     "session_token",
 			Value:    email.(string),
 			HttpOnly: true,
+			Path:     "/",
 			MaxAge:   86400,
 			Secure:   false,
 		})
 	http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusSeeOther)
+
 }

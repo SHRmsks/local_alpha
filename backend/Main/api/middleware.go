@@ -46,7 +46,7 @@ func MiddleWareOAUTH(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("middlewareOAUTH is working")
-		if r.URL.Path == "/callback" || r.URL.Path == "linkedin/callback" {
+		if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" {
 			next.ServeHTTP(w, r)
 			return
 		}
