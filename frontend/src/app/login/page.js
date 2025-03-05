@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
-import { useLinkedIn } from "react-linkedin-login-oauth2";
+import { v4 as uuidv4 } from 'uuid';
+
 
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import "@/app/global.css";
@@ -15,21 +16,18 @@ const GoogleloginButton = () => {
 };
 
 const LinkedInButton =()=> {
-    const { linkedInLogin } = useLinkedIn({
-      clientId: "77nme6nzlhmnlv",
-      scope: "r_liteprofile r_emailaddress",
-      redirectUri: "http://localhost:5050/linkedin/callback",
-      onSuccess: (res) => {
-        console.log(res);
-      },
-      onError: (err) => {
-        console.error(err);
-      },
-    });
-    return <div onClick={linkedInLogin}>
+    const redirect = () =>{
+    const uuid = uuidv4()
+    const  clientId= "77nme6nzlhmnlv"
+     const  scope=  "openid profile email"
+     const  redirectUri=  "http://localhost:5050/linkedin/callback"
+     window.location.href = encodeURI(`https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${uuid}`);
+    }
+
+    return <button onClick={redirect}>
 
     login with LinkedIn
-    </div>
+    </button>
 }
 export default function Login() {
   useEffect(() => {
