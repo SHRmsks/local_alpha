@@ -10,9 +10,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-
-	"Main/models"
 )
+
+type user struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
 
 var googleconfig = &oauth2.Config{
 	ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
@@ -52,7 +55,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// parser logic
-	var user models.User
+	var user user
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
