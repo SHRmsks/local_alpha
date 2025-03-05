@@ -1,12 +1,8 @@
 "use client";
+import Navbar from "@/components/navbar/navbar";
 import React, { useEffect } from "react";
-import "./global.css"
+import "./global.css";
 
 export default function Home() {
- 
-  return (
-    <div>
-     Hello world!
-    </div>
-  );
+    return <div>Hello world!</div>;
 }

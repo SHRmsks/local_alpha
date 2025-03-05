@@ -10,6 +10,8 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        'iper-blue': '#124A9D',
+        'iper-white': '#F9F4E9',
       },
     },
   },
