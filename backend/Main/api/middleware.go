@@ -22,7 +22,7 @@ type DBcontext struct {
 // checking if the user is logged in already or not for every single request
 func AuthenticateProtector(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/callback" {
+		if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -46,7 +46,7 @@ func MiddleWareOAUTH(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("middlewareOAUTH is working")
-		if r.URL.Path == "/callback" {
+		if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -57,6 +57,7 @@ func MiddleWareOAUTH(next http.Handler) http.Handler {
 		}
 		userEmail := cookie.Value
 		log.Println("user is found", userEmail)
+		
 		http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusFound)
 	})
 }

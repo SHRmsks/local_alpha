@@ -8,12 +8,10 @@ require (
 	github.com/go-chi/cors v1.2.1
 	github.com/google/uuid v1.6.0
 	go.mongodb.org/mongo-driver v1.17.3
+	golang.org/x/oauth2 v0.27.0
 )
 
-require (
-	cloud.google.com/go/compute/metadata v0.3.0 // indirect
-	golang.org/x/oauth2 v0.27.0 // indirect
-)
+require cloud.google.com/go/compute/metadata v0.3.0 // indirect
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect
