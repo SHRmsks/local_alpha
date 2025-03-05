@@ -16,7 +16,7 @@ import (
 	"github.com/lpernett/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	Api "iperuranium.com/backend/Main/Api"
+	Api "iperuranium.com/backend/Main/api"
 )
 
 func main() {
