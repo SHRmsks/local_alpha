@@ -16,7 +16,7 @@ import (
 	"github.com/lpernett/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"iperuranium.com/backend/Main/Api"
+	Api "iperuranium.com/backend/Main/api"
 )
 
 func main() {
@@ -43,14 +43,12 @@ func main() {
 	}
 
 	// Initialize database
-	contxt, cancel := context.WithTimeout(context.Background(), 50*time.Second)
-	if err != nil {
-		log.Fatal("Error connecting to database")
-	}
-	defer cancel()
+	contxt, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel() // Ensure context is canceled after use
+
 	client, err := mongo.Connect(contxt, options.Client().ApplyURI(db))
 	if err != nil {
-		log.Fatal("Error connecting to database")
+		log.Fatalf("Error connecting to database: %v", err)
 	}
 
 	// Initialize routes
@@ -92,8 +90,10 @@ func main() {
 			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {
 
 			})
+			privateURL.Options("/linkedin/callback", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Post("/login", Api.LoginHandler)
 			privateURL.Get("/callback", Api.CallbackHandler)
+			privateURL.Get("/linkedin/callback", Api.LinkedInCallbackHandler)
 
 		},
 	)
