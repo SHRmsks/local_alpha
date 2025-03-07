@@ -23,7 +23,6 @@ import (
 func main() {
 	// load configuration
 	err := godotenv.Load()
-
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -71,7 +70,7 @@ func main() {
 		defer wg.Done()
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		conn, err := pgxpool.New(ctx, PSQLdb)
+		conn, err := pgxpool.New(ctx, fmt.Sprint(PSQLdb+"USER"))
 		if err != nil {
 			log.Fatalf("Error connecting to Postgre: %v", err)
 
@@ -97,11 +96,9 @@ func main() {
 		log.Fatalf("Having trouble starting mongo Session")
 	}
 	DBinfo := Api.LoginInfo(mongoClient.Database("User"), psqlClient, &mongoSession)
-	// Initialize routes
 
-	r.Use(middleware.Logger)
 	// middleWare
-
+	r.Use(middleware.Logger)
 	// Cors set up
 	r.Group(func(publicURL chi.Router) {
 		publicURL.Use(cors.Handler(
@@ -126,19 +123,17 @@ func main() {
 				},
 			),
 			)
-			privateURL.Use(Api.AuthenticateProtector)
+			privateURL.Use(Api.AuthenticateProtector("http://localhost:3000/"))
 			privateURL.Use(Api.MiddleWareOAUTH)
 
 			// privateURL.Use(Api.MiddleWareLOGIN(mongoClient.Database("User"), psqlClient))
 
-			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {
-
-			})
-			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {
-
-			})
+			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
+			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})
+			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/linkedin/callback", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Post("/login", DBinfo.LoginHandler)
+			privateURL.Post("/signup", DBinfo.SignupHandler)
 			privateURL.Get("/callback", Api.CallbackHandler)
 			privateURL.Get("/linkedin/callback", Api.LinkedInCallbackHandler)
 

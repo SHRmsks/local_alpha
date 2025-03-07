@@ -1,6 +1,8 @@
 package Api
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -12,34 +14,40 @@ type MongoDBcontext struct {
 	Session mongo.Session
 }
 
-// checking if the user is logged in already or not for every single request
-func AuthenticateProtector(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" {
-			next.ServeHTTP(w, r)
-			return
-		}
-		log.Println("authenticateProtector is working")
-		cookie, err := r.Cookie("session_token")
-		if err != nil || cookie.Value == "" {
-			log.Printf("Not signed in yet")
-			http.Redirect(w, r, "http://localhost:3000/login", http.StatusBadRequest)
-			return
-		}
-		userEmail := cookie.Value
-		log.Println("user is found", userEmail)
+// checking if the user is logged in already or not for EVERY single request
+func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctxt := context.WithValue(r.Context(), "FrontendURL", frontendURL)
 
-		next.ServeHTTP(w, r)
-		return
-	})
+			if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" || r.URL.Path == "/signup" {
+				next.ServeHTTP(w, r.WithContext(ctxt))
+				return
+			}
+			log.Println("authenticateProtector is verifying")
+			cookie, err := r.Cookie("session_token")
+			if err != nil || cookie.Value == "" {
+				log.Printf("Session_ token missed, Not signed in yet")
+
+				http.Redirect(w, r, fmt.Sprintln(frontendURL+"login"), http.StatusBadRequest)
+				return
+			}
+			usertoken := cookie.Value
+			log.Println("user is found", usertoken)
+
+			next.ServeHTTP(w, r.WithContext(ctxt))
+			return
+		})
+	}
 }
 
 // using Google or LinkedIn instead
+
 func MiddleWareOAUTH(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("middlewareOAUTH is working")
-		if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" {
+		if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" || r.URL.Path == "/signup" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -48,8 +56,8 @@ func MiddleWareOAUTH(next http.Handler) http.Handler {
 			log.Printf("Not signed in yet")
 			return
 		}
-		userEmail := cookie.Value
-		log.Println("user is found", userEmail)
+		usertoken := cookie.Value
+		log.Println("user is found", usertoken)
 
 		http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusFound)
 	})

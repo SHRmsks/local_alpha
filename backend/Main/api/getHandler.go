@@ -1,13 +1,16 @@
 package Api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.mongodb.org/mongo-driver/bson"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -54,22 +57,12 @@ func LoginInfo(mongoDB *mongo.Database, psqlDB *pgxpool.Pool, session *mongo.Ses
 
 func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("login handler is called")
-	var dbCollection *mongo.Collection = h.MongoDB.Collection("loginInfo")
+	ctxt := context.Background()
+	frontendURL := r.Context().Value("FrontendURL").(string)
+	// var dbCollection *mongo.Collection = h.MongoDB.Collection("loginInfo")
+	var sqltable *pgxpool.Pool = h.PsqlPool
+	// var session mongo.Session = *h.MongoSession
 
-	var session mongo.Session = *h.MongoSession
-	// switch v := r.Context().Value("MongoDB").(type) {
-	// case MongoDBcontext:
-	// 	{
-	// 		dbCollection = v.DB.Collection("loginInfo")
-	// 		session = v.Session
-	// 	}
-	// default:
-	// 	http.Error(w, "Couldn't Fetch database information or User", http.StatusInternalServerError)
-	// 	log.Fatal("Couldn't Fetch database information or User")
-	// 	return
-	// }
-
-	// parser logic
 	var user user
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -79,25 +72,40 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// check if user exists in database
-	foundErr := dbCollection.FindOne(r.Context(), bson.M{
-		"UserName": user.UserName,
-		"Password": user.Password,
-	}).Decode(&user)
-	log.Println("User", user)
-	if foundErr != nil {
-		if foundErr == mongo.ErrNoDocuments {
-			http.Error(w, "User not found", http.StatusNotFound)
-			log.Println("User not found")
+	username := user.UserName
+	password := user.Password
+	var UserID uuid.UUID
+	err1 := sqltable.QueryRow(ctxt, "SELECT uuid FROM userinfo WHERE username=$1 AND password=$2", username, password).Scan(&UserID)
+	if err1 != nil {
+		if err == pgx.ErrNoRows {
+			log.Println("user is not found")
+			http.Redirect(w, r, fmt.Sprint(frontendURL+"signup"), http.StatusBadRequest)
 			return
 		}
-		http.Error(w, "User not found", http.StatusInternalServerError)
-		log.Printf("Database error: %v", foundErr)
+		http.Error(w, "Database Error", http.StatusInternalServerError)
 		return
 	}
-	http.SetCookie(w, &http.Cookie{
-		Name:  "session_token",
-		Value: user.UserName,
 
+	// foundErr := dbCollection.FindOne(r.Context(), bson.M{
+	// 	"UserName": user.UserName,
+	// 	"Password": user.Password,
+	// }).Decode(&user)
+	// log.Println("User", user)
+	// if foundErr != nil {
+	// 	if foundErr == mongo.ErrNoDocuments {
+	// 		frontURL := r.Context().Value("FrontendURL").(string)
+	// 		log.Println("User not existed yet")
+	// 		http.Redirect(w, r, fmt.Sprint(frontURL+"signup"), http.StatusSeeOther)
+
+	// 		return
+	// 	}
+	// 	http.Error(w, "User not found", http.StatusInternalServerError)
+	// 	log.Printf("Database error: %v", foundErr)
+	// 	return
+	// }
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    UserID.String(),
 		Path:     "/",
 		HttpOnly: true,
 		MaxAge:   86400,
@@ -109,12 +117,49 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message":  "Login Successful",
-		"username": user.UserName,
-		"password": user.Password,
-		"session":  session,
+		"message": "Login Successful",
+
+		"uuid": UserID.String(),
 	})
 
+}
+
+// signup handler
+func (h *DBInfo) SignupHandler(w http.ResponseWriter, r *http.Request) {
+	psqlPool := h.PsqlPool
+	ctxt := context.Background()
+	FrontendURL := r.Context().Value("FrontendURL").(string)
+	var user user
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		log.Println("Invalid Request Body")
+		http.Error(w, "Invalid Request Body", http.StatusBadRequest)
+		return
+	}
+	userName := user.UserName
+	password := user.Password
+	log.Println("userName: ", userName)
+	log.Println("password", password)
+	err1 := psqlPool.QueryRow(ctxt, "SELECT username, password FROM userinfo WHERE username=$1 AND password=$2", userName, password).Scan(&userName, &password)
+	if err1 != nil {
+		if err1 == pgx.ErrNoRows {
+
+			log.Printf("signing the user %v up", userName)
+			uuid := uuid.New()
+			_, err2 := psqlPool.Exec(ctxt, "INSERT INTO userinfo (username, password, uuid) values ($1,$2,$3)", userName, password, uuid)
+			if err2 != nil {
+				http.Error(w, "Errors with Signing up", http.StatusBadRequest)
+				return
+			}
+
+			log.Println("Signing up successfully")
+			http.Redirect(w, r, fmt.Sprintln(FrontendURL+"/login"), http.StatusSeeOther)
+			return
+		}
+	}
+	log.Println("user is already exist")
+	http.Redirect(w, r, fmt.Sprintln(FrontendURL+"/login"), http.StatusSeeOther)
+	return
 }
 
 // this is for the linkedin server
