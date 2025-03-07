@@ -6,17 +6,25 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
+type DBInfo struct {
+	PsqlPool     *pgxpool.Pool
+	MongoDB      *mongo.Database
+	MongoSession *mongo.Session
+}
+
 type user struct {
 	UserName string `json:"userName"`
 	Password string `json:"password"`
 }
 
+/*Google and LinkedIn Oauth config*/
 var googleconfig = &oauth2.Config{
 	ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
 	ClientSecret: "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",
@@ -36,29 +44,37 @@ var linkedInconfig = &oauth2.Config{
 	},
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("login handler is called")
-	var dbCollection *mongo.Collection
-	var uuid int64
-	var session mongo.Session
-	switch v := r.Context().Value("DB").(type) {
-	case DBcontext:
-		{
-			dbCollection = v.DB.Collection("loginInfo")
-			uuid = v.UserCtxt.UUID
-			session = v.UserCtxt.Session
-		}
-	default:
-		http.Error(w, "Couldn't Fetch database information or User", http.StatusInternalServerError)
-		log.Fatal("Couldn't Fetch database information or User")
-		return
+func LoginInfo(mongoDB *mongo.Database, psqlDB *pgxpool.Pool, session *mongo.Session) *DBInfo {
+	return &DBInfo{
+		MongoDB:      mongoDB,
+		PsqlPool:     psqlDB,
+		MongoSession: session,
 	}
+}
+
+func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("login handler is called")
+	var dbCollection *mongo.Collection = h.MongoDB.Collection("loginInfo")
+
+	var session mongo.Session = *h.MongoSession
+	// switch v := r.Context().Value("MongoDB").(type) {
+	// case MongoDBcontext:
+	// 	{
+	// 		dbCollection = v.DB.Collection("loginInfo")
+	// 		session = v.Session
+	// 	}
+	// default:
+	// 	http.Error(w, "Couldn't Fetch database information or User", http.StatusInternalServerError)
+	// 	log.Fatal("Couldn't Fetch database information or User")
+	// 	return
+	// }
 
 	// parser logic
 	var user user
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		log.Printf("JSON decode error: %v", err)
 		log.Println("Error on getting user information")
 		return
 	}
@@ -78,15 +94,27 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Database error: %v", foundErr)
 		return
 	}
+	http.SetCookie(w, &http.Cookie{
+		Name:  "session_token",
+		Value: user.UserName,
+
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   86400,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   false,
+	})
 
 	//send response in JSON format
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message":   "Login Successful",
-		"userID":    uuid,
-		"sessionID": session.ID(),
+		"message":  "Login Successful",
+		"username": user.UserName,
+		"password": user.Password,
+		"session":  session,
 	})
+
 }
 
 // this is for the linkedin server

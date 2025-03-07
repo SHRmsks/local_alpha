@@ -7,12 +7,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
-
-	"github.com/go-chi/cors"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lpernett/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -27,7 +28,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	log.Println("Environment variables loaded successfully")
-	port := os.Getenv("PORT")
+	port := os.Getenv("PORT") // backend port
 
 	frontEND_PORT := os.Getenv("FRONTEND_PORT")
 	log.Println("frontend port: ", frontEND_PORT)
@@ -35,22 +36,67 @@ func main() {
 	if domainName == "" {
 		domainName = ""
 	}
-	db := os.Getenv("DBURL")
+
+	// go rountine to initilize the database
+	Mongodb := os.Getenv("DBURL")
+	PSQLdb := os.Getenv("PSQLURL")
 	r := chi.NewRouter()
+
+	/*backend Server*/
 	server := &http.Server{
 		Addr:    port,
 		Handler: r,
 	}
+	var mongoClient *mongo.Client
+	var psqlClient *pgxpool.Pool
 
-	// Initialize database
-	contxt, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel() // Ensure context is canceled after use
+	var wg sync.WaitGroup
+	wg.Add(2)
+	done := make(chan struct{})
+	var timeout = time.After(45 * time.Second)
+	// Initialize mongo db database
+	go func() {
+		defer wg.Done()
+		contxt, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel() // Ensure context is canceled after use
 
-	client, err := mongo.Connect(contxt, options.Client().ApplyURI(db))
-	if err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
+		client, errMongo := mongo.Connect(contxt, options.Client().ApplyURI(Mongodb))
+		if errMongo != nil {
+			log.Fatalf("Error connecting to Mongodb: %v", err)
+			return
+		}
+		mongoClient = client
+	}()
+	go func() {
+		defer wg.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		conn, err := pgxpool.New(ctx, PSQLdb)
+		if err != nil {
+			log.Fatalf("Error connecting to Postgre: %v", err)
+
+			return
+
+		}
+		psqlClient = conn
+	}()
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		log.Println("connection Successfully")
+
+	case <-timeout:
+		log.Fatalf("Connection to Database timed out")
 	}
-
+	mongoSession, err := mongoClient.StartSession()
+	if err != nil {
+		log.Fatalf("Having trouble starting mongo Session")
+	}
+	DBinfo := Api.LoginInfo(mongoClient.Database("User"), psqlClient, &mongoSession)
 	// Initialize routes
 
 	r.Use(middleware.Logger)
@@ -82,7 +128,8 @@ func main() {
 			)
 			privateURL.Use(Api.AuthenticateProtector)
 			privateURL.Use(Api.MiddleWareOAUTH)
-			privateURL.Use(Api.MiddleWareLOGIN(client.Database("User")))
+
+			// privateURL.Use(Api.MiddleWareLOGIN(mongoClient.Database("User"), psqlClient))
 
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {
 
@@ -91,7 +138,7 @@ func main() {
 
 			})
 			privateURL.Options("/linkedin/callback", func(w http.ResponseWriter, r *http.Request) {})
-			privateURL.Post("/login", Api.LoginHandler)
+			privateURL.Post("/login", DBinfo.LoginHandler)
 			privateURL.Get("/callback", Api.CallbackHandler)
 			privateURL.Get("/linkedin/callback", Api.LinkedInCallbackHandler)
 
