@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
+//import { v4 as uuidv4 } from "uuid";
+
+import LoginPage from "@/components/login/login";
 
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import "@/app/global.css";
@@ -47,6 +49,8 @@ export default function Login() {
             </GoogleOAuthProvider>
 
             <LinkedInButton />
+
+            <LoginPage />
         </div>
     );
 }
