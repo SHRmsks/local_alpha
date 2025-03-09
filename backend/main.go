@@ -39,6 +39,9 @@ func main() {
 	// go rountine to initilize the database
 	Mongodb := os.Getenv("DBURL")
 	PSQLdb := os.Getenv("PSQLURL")
+	googleClientSecret := os.Getenv("googleClientSecret")
+	linkedinClientSecret := os.Getenv("linkedinClientSecret")
+
 	r := chi.NewRouter()
 
 	/*backend Server*/
@@ -95,7 +98,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Having trouble starting mongo Session")
 	}
-	DBinfo := Api.LoginInfo(mongoClient.Database("User"), psqlClient, &mongoSession)
+
+	DBinfo := Api.LoginInfo(mongoClient.Database("User"), psqlClient, &mongoSession, googleClientSecret, linkedinClientSecret)
 
 	// middleWare
 	r.Use(middleware.Logger)

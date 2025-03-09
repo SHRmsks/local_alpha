@@ -17,9 +17,11 @@ import (
 )
 
 type DBInfo struct {
-	PsqlPool     *pgxpool.Pool
-	MongoDB      *mongo.Database
-	MongoSession *mongo.Session
+	PsqlPool             *pgxpool.Pool
+	MongoDB              *mongo.Database
+	MongoSession         *mongo.Session
+	googleClientSecret   string
+	linkedinClientSecret string
 }
 
 type user struct {
@@ -27,31 +29,13 @@ type user struct {
 	Password string `json:"password"`
 }
 
-/*Google and LinkedIn Oauth config*/
-var googleconfig = &oauth2.Config{
-	ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
-	ClientSecret: "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",
-	RedirectURL:  "http://localhost:5050/callback",
-	Endpoint:     google.Endpoint,
-	Scopes:       []string{"openid", "profile", "email"},
-}
-var linkedInconfig = &oauth2.Config{
-	ClientID:     "77nme6nzlhmnlv",
-	ClientSecret: "WPL_AP1.U7xavECHgwKAnUkK.zu3mHw==",
-	Scopes:       []string{"openid", "profile", "email"},
-	RedirectURL:  "http://localhost:5050/linkedin/callback",
-	Endpoint: oauth2.Endpoint{
-		AuthURL:   "https://www.linkedin.com/oauth/v2/authorization",
-		TokenURL:  "https://www.linkedin.com/oauth/v2/accessToken",
-		AuthStyle: oauth2.AuthStyleInParams,
-	},
-}
-
-func LoginInfo(mongoDB *mongo.Database, psqlDB *pgxpool.Pool, session *mongo.Session) *DBInfo {
+func LoginInfo(mongoDB *mongo.Database, psqlDB *pgxpool.Pool, session *mongo.Session, googlesecret string, linkedinsecret string) *DBInfo {
 	return &DBInfo{
-		MongoDB:      mongoDB,
-		PsqlPool:     psqlDB,
-		MongoSession: session,
+		MongoDB:              mongoDB,
+		PsqlPool:             psqlDB,
+		MongoSession:         session,
+		googleClientSecret:   googlesecret,
+		linkedinClientSecret: linkedinsecret,
 	}
 }
 
@@ -164,6 +148,17 @@ func (h *DBInfo) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 // this is for the linkedin server
 func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	var linkedInconfig = &oauth2.Config{
+		ClientID:     "77nme6nzlhmnlv",
+		ClientSecret: h.linkedinClientSecret,
+		Scopes:       []string{"openid", "profile", "email"},
+		RedirectURL:  "http://localhost:5050/linkedin/callback",
+		Endpoint: oauth2.Endpoint{
+			AuthURL:   "https://www.linkedin.com/oauth/v2/authorization",
+			TokenURL:  "https://www.linkedin.com/oauth/v2/accessToken",
+			AuthStyle: oauth2.AuthStyleInParams,
+		},
+	}
 	log.Println("linkedIn callback handler is called")
 	context := r.Context()
 	tempCode := r.URL.Query().Get("code")
@@ -178,7 +173,7 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	idToken := token.AccessToken
-	// log.Println("linkedin token", idToken)
+	log.Println("linkedin token", idToken)
 	// verify the token
 	var linkedinInfo map[string]interface{}
 
@@ -248,7 +243,13 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 
 // this is for google server
 func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
-
+	var googleconfig = &oauth2.Config{
+		ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
+		ClientSecret: h.googleClientSecret,
+		RedirectURL:  "http://localhost:5050/callback",
+		Endpoint:     google.Endpoint,
+		Scopes:       []string{"openid", "profile", "email"},
+	}
 	log.Println("callback handler is called")
 	context := r.Context()
 
@@ -300,12 +301,12 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			log.Println("sign up with user successfully")
 		} else {
-			log.Println("Couldn't sign user up through google, err msg: ", err1)
+			log.Println("Couldn't sign user up through google , err msg: ", err1)
 			return
 		}
 	}
 
-	// log.Println("Token info: ", email, username, uuid1)
+	log.Println("Token info: ", email, username, uuid1)
 
 	http.SetCookie(
 		w, &http.Cookie{
