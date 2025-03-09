@@ -62,29 +62,3 @@ func MiddleWareOAUTH(next http.Handler) http.Handler {
 		http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusFound)
 	})
 }
-
-// // pass here for checking user info
-// func MiddleWareLOGIN(db *mongo.Database, psql *pgxpool.Pool) func(http.Handler) http.Handler {
-// 	return func(next http.Handler) http.Handler {
-// 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 			log.Println("middleWare is working")
-
-// 			newSession, err := db.Client().StartSession()
-
-// 			if err != nil {
-// 				http.Error(w, "Error starting session", http.StatusInternalServerError)
-// 				return
-// 			}
-// 			defer newSession.EndSession(r.Context())
-
-// 			ctx := context.WithValue(r.Context(), "PsqlDB", psql)
-// 			ctx = context.WithValue(ctx, "MongoDB", MongoDBcontext{
-// 				DB:      db,
-// 				Session: newSession,
-// 			})
-
-// 			next.ServeHTTP(w, r.WithContext(ctx))
-// 		})
-// 	}
-
-// }

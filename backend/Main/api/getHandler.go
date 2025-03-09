@@ -77,7 +77,7 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var UserID uuid.UUID
 	err1 := sqltable.QueryRow(ctxt, "SELECT uuid FROM userinfo WHERE username=$1 AND password=$2", username, password).Scan(&UserID)
 	if err1 != nil {
-		if err == pgx.ErrNoRows {
+		if err1 == pgx.ErrNoRows {
 			log.Println("user is not found")
 			http.Redirect(w, r, fmt.Sprint(frontendURL+"signup"), http.StatusBadRequest)
 			return
@@ -226,7 +226,7 @@ func LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // this is for google server
-func CallbackHandler(w http.ResponseWriter, r *http.Request) {
+func (h *DBInfo) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("callback handler is called")
 	context := r.Context()
@@ -260,17 +260,33 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
 		return
 	}
-	email, ok := googleInfo["email"]
-	if !ok {
+	email, ok1 := googleInfo["email"].(string)
+	username, ok2 := googleInfo["name"].(string)
+	if !ok1 || !ok2 {
 		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
 		return
 	}
-	log.Println("Token info: ", email)
+	var uuid1 uuid.UUID
+
+	psql := h.PsqlPool
+	err1 := psql.QueryRow(context, "SELECT uuid FROM userinfo WHERE email=$1", email).Scan(&uuid1)
+	if err1 != nil {
+		uuid1 = uuid.New()
+		if err1 == pgx.ErrNoRows {
+			_, err1 := psql.Exec(context, "INSERT INTO userinfo (username, password ,uuid, email) values  ($1, $2, $3, $4)", username, "000000", uuid1, email)
+			if err1 != nil {
+				log.Println("can't sign up with google oauth")
+			}
+			log.Println("sign up with user successfully")
+		}
+	}
+
+	log.Println("Token info: ", email, username, uuid1)
 
 	http.SetCookie(
 		w, &http.Cookie{
 			Name:     "session_token",
-			Value:    email.(string),
+			Value:    uuid1.String(),
 			HttpOnly: true,
 			Path:     "/",
 			MaxAge:   86400,
