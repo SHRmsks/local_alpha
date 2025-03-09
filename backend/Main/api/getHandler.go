@@ -163,7 +163,7 @@ func (h *DBInfo) SignupHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // this is for the linkedin server
-func LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
+func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("linkedIn callback handler is called")
 	context := r.Context()
 	tempCode := r.URL.Query().Get("code")
@@ -178,7 +178,7 @@ func LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	idToken := token.AccessToken
-	log.Println("linkedin token", idToken)
+	// log.Println("linkedin token", idToken)
 	// verify the token
 	var linkedinInfo map[string]interface{}
 
@@ -202,19 +202,40 @@ func LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(res.Body).Decode(&linkedinInfo)
 	if err != nil {
 		http.Error(w, "Error with Signing in LinkedIn Server", http.StatusInternalServerError)
+
 		return
 	}
+	// log.Println("linedinInfo", linkedinInfo)
 
 	// send response in JSON format
 
 	email := linkedinInfo["email"].(string)
-	log.Println("email", email)
+	name := linkedinInfo["name"].(string)
+
+	psql := h.PsqlPool
+	var uuid1 uuid.UUID
+	err1 := psql.QueryRow(context, "SELECT uuid FROM userinfo WHERE email=$1", email).Scan(&uuid1)
+	if err1 != nil {
+		if err1 == pgx.ErrNoRows {
+			log.Println("signing up user right now")
+			uuid1 = uuid.New()
+			_, err2 := psql.Exec(context, "INSERT INTO userinfo (username, password, uuid, email, provider) VALUES ($1,$2,$3,$4,$5)", name, "000000", uuid1, email, 0)
+			if err2 != nil {
+				log.Println("Couldn't sign user up through linkedin, err msg: ", err2)
+			}
+
+		} else {
+			log.Println("Couldn't sign user up through linkedin, err msg: ", err1)
+			return
+		}
+	}
+
 	// store as Cookie
 
 	http.SetCookie(
 		w, &http.Cookie{
 			Name:     "session_token",
-			Value:    email,
+			Value:    uuid1.String(),
 			Path:     "/",
 			HttpOnly: true,
 			MaxAge:   86400,
@@ -226,7 +247,7 @@ func LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // this is for google server
-func (h *DBInfo) CallbackHandler(w http.ResponseWriter, r *http.Request) {
+func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("callback handler is called")
 	context := r.Context()
@@ -273,15 +294,18 @@ func (h *DBInfo) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	if err1 != nil {
 		uuid1 = uuid.New()
 		if err1 == pgx.ErrNoRows {
-			_, err1 := psql.Exec(context, "INSERT INTO userinfo (username, password ,uuid, email) values  ($1, $2, $3, $4)", username, "000000", uuid1, email)
+			_, err1 := psql.Exec(context, "INSERT INTO userinfo (username, password ,uuid, email, provider) values  ($1, $2, $3, $4, $5)", username, "000000", uuid1, email, 1)
 			if err1 != nil {
 				log.Println("can't sign up with google oauth")
 			}
 			log.Println("sign up with user successfully")
+		} else {
+			log.Println("Couldn't sign user up through google, err msg: ", err1)
+			return
 		}
 	}
 
-	log.Println("Token info: ", email, username, uuid1)
+	// log.Println("Token info: ", email, username, uuid1)
 
 	http.SetCookie(
 		w, &http.Cookie{
