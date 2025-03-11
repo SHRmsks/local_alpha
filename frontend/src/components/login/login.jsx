@@ -1,6 +1,8 @@
 "use client";
 
 import "@/app/global.css";
+import { useRouter } from "next/navigation";
+import {useState, useEffect} from 'react'
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
 import logoGoogle from "@/../public/assets/logo-google.svg";
@@ -9,6 +11,8 @@ import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { v4 as uuidv4 } from "uuid";
 
 export default function LoginPage() {
+    const router = useRouter()
+    // fetching the oauth
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     ux_mode: "redirect",
@@ -26,6 +30,46 @@ export default function LoginPage() {
     );
   };
 
+  const [emailValue, setEmailValue] = useState('')
+  const [passwordValue, setPasswordValue] = useState('')
+
+  const submitHandler = () => {
+        const jsonfiedLoginVal = JSON.stringify(
+            {
+                userName: emailValue.toString().trim(),
+                password: passwordValue.toString().trim(),
+            }
+        )
+     fetch("http://localhost:5050/login", {method: "POST", 
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: jsonfiedLoginVal,
+         credentials: "include"
+      }).then((res)=> {
+        if (!res.ok){
+            throw new Error("Network Lost")
+        }
+        return res.json();
+      }
+    
+    ).then ((json)=> 
+    {
+        if (json.message=== "Login Successful"){
+        const uuid = json.uuid
+        console.log("uuid1", uuid)
+        router.push(`/dashboard?session=${uuid}`)
+      
+    }
+
+    }
+    
+    ).catch((err)=>{
+        throw new Error("error: ", err)
+    })
+     
+  }
+  
   return (
     <div className="bg-iper-white w-full h-screen flex flex-col justify-center items-center">
       <div className="bg-white rounded-[40px] p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit shadow-md flex flex-col justify-center items-center gap-4 lg:gap-6">
@@ -40,14 +84,18 @@ export default function LoginPage() {
         <div className="w-full flex flex-col gap-1">
           <p className="text-sm">EMAIL</p>
           <input
+            value={emailValue}
+            onChange={(evt)=> setEmailValue(evt.target.value)}
             type="text"
             placeholder="xxxxx@email.com"
-            className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs"
+            className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs "
           />
         </div>
         <div className="w-full flex flex-col gap-1">
           <p className="text-sm">PASSWORD</p>
           <input
+            value={passwordValue}
+            onChange={(evt)=>setPasswordValue(evt.target.value)}
             type="password"
             placeholder="Enter your password here"
             className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs"
@@ -57,7 +105,7 @@ export default function LoginPage() {
           <button className="text-[10px] md:text-xs text-[#707070]">
             Forgot password?
           </button>
-          <button className="bg-iper-blue w-20 md:w-24 py-2 md:py-2.5 rounded-lg text-iper-white text-[10px] md:text-xs">
+          <button onClick={submitHandler} className="bg-iper-blue w-20 md:w-24 py-2 md:py-2.5 rounded-lg text-iper-white text-[10px] md:text-xs">
             Login
           </button>
         </div>
@@ -69,32 +117,30 @@ export default function LoginPage() {
           <hr className="w-28 md:w-32 lg:w-40 border-t border-iper-blue justify-self-end" />
         </div>
 
-        <GoogleOAuthProvider clientId="43488699135-6muejl3ggsu962hcav4qc1shuo3jesat.apps.googleusercontent.com">
-          <div className="flex justify-center items-center gap-6 w-full">
-            <button
-              onClick={googleLogin}
-              className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full"
-            >
-              <Image
-                src={logoGoogle}
-                alt="Google Logo"
-                className="size-4 md:size-5"
-              />
-              <p>Google</p>
-            </button>
-            <button
-              onClick={linkedInLogin}
-              className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full"
-            >
-              <Image
-                src={logoLinkedin}
-                alt="LinkedIn Logo"
-                className="size-4 md:size-5"
-              />
-              <p>LinkedIn</p>
-            </button>
-          </div>
-        </GoogleOAuthProvider>
+        <div className="flex justify-center items-center gap-6 w-full">
+          <button
+            onClick={googleLogin}
+            className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full hover:scale-[1.1]"
+          >
+            <Image
+              src={logoGoogle}
+              alt="Google Logo"
+              className="size-4 md:size-5"
+            />
+            <p>Google</p>
+          </button>
+          <button
+            onClick={linkedInLogin}
+            className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full hover:scale-[1.1]"
+          >
+            <Image
+              src={logoLinkedin}
+              alt="LinkedIn Logo"
+              className="size-4 md:size-5"
+            />
+            <p>LinkedIn</p>
+          </button>
+        </div>
 
         <div className="flex justify-center items-center gap-6 w-full">
           <p className="text-[10px] md:text-xs text-[#707070]">
