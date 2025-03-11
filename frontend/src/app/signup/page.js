@@ -2,7 +2,7 @@
 
 import "@/app/global.css";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
 
@@ -14,7 +14,32 @@ export default function Signup() {
   const [passwordValue, setPasswordValue] = useState("");
   const [confirmValue, setConfirmValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [legitPsswrd, setLegitPsswrd] = useState(true);
+  const [legitRepeat, setlegitRepeat] = useState(true);
 
+  useEffect(() => {
+    if (passwordValue !== "") {
+      if (
+        passwordValue.length < 6 ||
+        passwordValue.length > 30 ||
+        !/[a-z]/.test(passwordValue) ||
+        !/[A-Z]/.test(passwordValue)
+      ) {
+        setLegitPsswrd(false);
+      } else {
+        setLegitPsswrd(true);
+      }
+    } else {
+      setLegitPsswrd(true);
+    }
+    if (passwordValue !== "" && confirmValue !== "") {
+      if (passwordValue !== confirmValue) {
+        setlegitRepeat(false);
+      } else {
+        setlegitRepeat(true);
+      }
+    }
+  }, [passwordValue, confirmValue]);
   const signupHandler = () => {
     setNameValue("");
     setEmailValue("");
@@ -80,7 +105,21 @@ export default function Signup() {
           />
         </div>
         <div className="w-full flex flex-col gap-1">
-          <p className="text-sm">PASSWORD</p>
+          <div className="w-full flex-row gap-[5px] items-center justify-start">
+            <p className="text-sm">PASSWORD</p>
+            {legitPsswrd && legitRepeat ? null : legitPsswrd ? (
+              legitRepeat ? null : (
+                <p className="text-[#FF4949] text-[10px]">
+                  password is not matched
+                </p>
+              )
+            ) : (
+              <p className="text-[#FF4949] text-[10px] break-words text-pretty">
+                password must be longer than 6 digits and less than 15 digits
+                with at least one uppercase and lowercase{" "}
+              </p>
+            )}
+          </div>
           <input
             value={passwordValue}
             onChange={(evt) => setPasswordValue(evt.target.value)}
@@ -102,16 +141,18 @@ export default function Signup() {
             {showPassword ? "Hide password" : "Show password"}
           </p>
         </div>
-        <div className="flex justify-between items-center w-full">
+        <div className="flex justify-center items-center w-full">
           <button
-            className="text-[10px] md:text-xs text-[#707070] hover:underline"
-            style={{ visibility: "hidden" }}
-          >
-            Forgot password?
-          </button>
-          <button
+            disabled={
+              !legitPsswrd ||
+              !legitRepeat ||
+              passwordValue === "" ||
+              confirmValue === "" || 
+              nameValue === ""||
+              emailValue===""
+            }
             onClick={signupHandler}
-            className="bg-iper-blue w-20 md:w-24 py-2 md:py-2.5 rounded-lg text-iper-white text-[10px] md:text-xs transition hover:bg-iper-gold"
+            className=" bg-iper-blue w-20 md:w-24 py-2 md:py-2.5 rounded-lg text-iper-white text-[10px] md:text-xs transition hover:bg-iper-gold disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-iper-blue"
           >
             Sign Up
           </button>
