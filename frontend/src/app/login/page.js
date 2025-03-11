@@ -1,6 +1,7 @@
 "use client";
 
 import "@/app/global.css";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
@@ -34,8 +35,47 @@ export default function Login() {
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [signup, setSignup] = useState(false);
+  const signupHandler = () => {
+    setNameValue("");
+    setEmailValue("");
+    setPasswordValue("");
+    const jsonfiedSignupVal = JSON.stringify({
+      userName: nameValue.toString().trim(),
+      password: passwordValue.toString().trim(),
+      email: emailValue.toString().trim(),
+    });
+    fetch("http://localhost:5050/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonfiedSignupVal,
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Connection error");
+        }
+        return res.json();
+      })
+      .then((json) => {
+        if (json.message === "Successful") {
+          if (signup === true) {
+          }
+        } else {
+          console.log("user is existed");
+        }
+        setSignup(false);
+        router.push("/login");
+        return;
+      })
+      .catch((err) => console.error(err));
+  };
 
   const submitHandler = () => {
+    setNameValue("");
+    setEmailValue("");
+    setPasswordValue("");
     const jsonfiedLoginVal = JSON.stringify({
       userName: emailValue.toString().trim(),
       password: passwordValue.toString().trim(),
@@ -62,7 +102,8 @@ export default function Login() {
         }
       })
       .catch((err) => {
-        throw new Error("error: ", err);
+        console.error(err);
+        setSignup(true);
       });
   };
 
@@ -77,16 +118,18 @@ export default function Login() {
         <h1 className="font-krub font-extrabold text-2xl md:text-3xl lg:text-4xl">
           {signup ? "New to IPER?" : "Welcome to IPER"}
         </h1>
-        { signup && <div className="w-full flex flex-col gap-1">
-          <p className="text-sm">NAME</p>
-          <input
-            value={nameValue}
-            onChange={(evt) => setNameValue(evt.target.value)}
-            type="text"
-            placeholder="[First Name] [Last Name]"
-            className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs "
-          />
-        </div> }
+        {signup && (
+          <div className="w-full flex flex-col gap-1">
+            <p className="text-sm">NAME</p>
+            <input
+              value={nameValue}
+              onChange={(evt) => setNameValue(evt.target.value)}
+              type="text"
+              placeholder="[First Name] [Last Name]"
+              className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs "
+            />
+          </div>
+        )}
         <div className="w-full flex flex-col gap-1">
           <p className="text-sm">EMAIL</p>
           <input
@@ -115,45 +158,51 @@ export default function Login() {
             Forgot password?
           </button>
           <button
-            onClick={signup ? () => {}/*placeholder for signup*/ : submitHandler}
+            onClick={
+              signup ? signupHandler /*placeholder for signup*/ : submitHandler
+            }
             className="bg-iper-blue w-20 md:w-24 py-2 md:py-2.5 rounded-lg text-iper-white text-[10px] md:text-xs transition hover:bg-iper-gold"
           >
             Login
           </button>
         </div>
 
-        {!signup && <><div className="grid grid-cols-3 items-center my-[-6px]">
-          <hr className="w-28 md:w-32 lg:w-40 border-t border-iper-blue justify-self-start" />
-          <p className="text-xs md:text-sm text-iper-blue justify-self-center">
-            OR
-          </p>
-          <hr className="w-28 md:w-32 lg:w-40 border-t border-iper-blue justify-self-end" />
-        </div>
+        {!signup && (
+          <>
+            <div className="grid grid-cols-3 items-center my-[-6px]">
+              <hr className="w-28 md:w-32 lg:w-40 border-t border-iper-blue justify-self-start" />
+              <p className="text-xs md:text-sm text-iper-blue justify-self-center">
+                OR
+              </p>
+              <hr className="w-28 md:w-32 lg:w-40 border-t border-iper-blue justify-self-end" />
+            </div>
 
-        <div className="flex justify-center items-center gap-6 w-full">
-          <button
-            onClick={googleLogin}
-            className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full transition hover:scale-[1.05]"
-          >
-            <Image
-              src={logoGoogle}
-              alt="Google Logo"
-              className="size-4 md:size-5"
-            />
-            <p>Google</p>
-          </button>
-          <button
-            onClick={linkedInLogin}
-            className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full transition hover:scale-[1.05]"
-          >
-            <Image
-              src={logoLinkedin}
-              alt="LinkedIn Logo"
-              className="size-4 md:size-5"
-            />
-            <p>LinkedIn</p>
-          </button>
-        </div></>}
+            <div className="flex justify-center items-center gap-6 w-full">
+              <button
+                onClick={googleLogin}
+                className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full transition hover:scale-[1.05]"
+              >
+                <Image
+                  src={logoGoogle}
+                  alt="Google Logo"
+                  className="size-4 md:size-5"
+                />
+                <p>Google</p>
+              </button>
+              <button
+                onClick={linkedInLogin}
+                className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full transition hover:scale-[1.05]"
+              >
+                <Image
+                  src={logoLinkedin}
+                  alt="LinkedIn Logo"
+                  className="size-4 md:size-5"
+                />
+                <p>LinkedIn</p>
+              </button>
+            </div>
+          </>
+        )}
 
         <div className="flex justify-center items-center gap-6 w-full">
           <p className="text-[10px] md:text-xs text-[#707070]">

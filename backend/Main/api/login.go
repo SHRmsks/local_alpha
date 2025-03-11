@@ -10,8 +10,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -27,6 +27,11 @@ type DBInfo struct {
 type user struct {
 	UserName string `json:"userName"`
 	Password string `json:"password"`
+}
+type userSignup struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 func LoginInfo(mongoDB *mongo.Database, psqlDB *pgxpool.Pool, session *mongo.Session, googlesecret string, linkedinsecret string) *DBInfo {
@@ -58,8 +63,10 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// check if user exists in database
 	username := user.UserName
 	password := user.Password
+
 	var UserID uuid.UUID
-	err1 := sqltable.QueryRow(ctxt, "SELECT uuid FROM userinfo WHERE email=$1 AND password=$2", username, password).Scan(&UserID)
+	var psswrd []byte
+	err1 := sqltable.QueryRow(ctxt, "SELECT uuid, psswrd FROM userinfo WHERE email=$1", username).Scan(&UserID, &psswrd)
 	if err1 != nil {
 		if err1 == pgx.ErrNoRows {
 			log.Println("user is not found")
@@ -69,24 +76,12 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Database Error", http.StatusInternalServerError)
 		return
 	}
+	err3 := bcrypt.CompareHashAndPassword(psswrd, []byte(password))
+	if err3 != nil {
+		http.Error(w, "Wrong Password", http.StatusBadRequest)
+		return
+	}
 
-	// foundErr := dbCollection.FindOne(r.Context(), bson.M{
-	// 	"UserName": user.UserName,
-	// 	"Password": user.Password,
-	// }).Decode(&user)
-	// log.Println("User", user)
-	// if foundErr != nil {
-	// 	if foundErr == mongo.ErrNoDocuments {
-	// 		frontURL := r.Context().Value("FrontendURL").(string)
-	// 		log.Println("User not existed yet")
-	// 		http.Redirect(w, r, fmt.Sprint(frontURL+"signup"), http.StatusSeeOther)
-
-	// 		return
-	// 	}
-	// 	http.Error(w, "User not found", http.StatusInternalServerError)
-	// 	log.Printf("Database error: %v", foundErr)
-	// 	return
-	// }
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    UserID.String(),
@@ -112,8 +107,8 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 func (h *DBInfo) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	psqlPool := h.PsqlPool
 	ctxt := context.Background()
-	FrontendURL := r.Context().Value("FrontendURL").(string)
-	var user user
+	// FrontendURL := r.Context().Value("FrontendURL").(string)
+	var user userSignup
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Println("Invalid Request Body")
@@ -122,27 +117,42 @@ func (h *DBInfo) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	userName := user.UserName
 	password := user.Password
+	email := user.Email
 	log.Println("userName: ", userName)
+	log.Println("email: ", email)
 	log.Println("password", password)
-	err1 := psqlPool.QueryRow(ctxt, "SELECT username, password FROM userinfo WHERE username=$1 AND password=$2", userName, password).Scan(&userName, &password)
+
+	err1 := psqlPool.QueryRow(ctxt, "SELECT username, email FROM userinfo WHERE username=$1 AND email=$2", userName, email).Scan(&userName, &email)
+
 	if err1 != nil {
 		if err1 == pgx.ErrNoRows {
 
 			log.Printf("signing the user %v up", userName)
 			uuid := uuid.New()
-			_, err2 := psqlPool.Exec(ctxt, "INSERT INTO userinfo (username, password, uuid) values ($1,$2,$3)", userName, password, uuid)
+			psswrd, err3 := bcrypt.GenerateFromPassword([]byte(password), 10)
+			if err3 != nil {
+				log.Println("can't generate the password", psswrd)
+				http.Error(w, "can't creating hash for password", http.StatusBadRequest)
+				return
+			}
+
+			_, err2 := psqlPool.Exec(ctxt, "INSERT INTO userinfo (username, uuid, email, psswrd) values ($1,$2,$3, $4)", userName, uuid, email, psswrd)
 			if err2 != nil {
 				http.Error(w, "Errors with Signing up", http.StatusBadRequest)
 				return
 			}
 
 			log.Println("Signing up successfully")
-			http.Redirect(w, r, fmt.Sprintln(FrontendURL+"/login"), http.StatusSeeOther)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusAccepted)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "Successful",
+				"uuid":    uuid.String(),
+			})
 			return
 		}
 	}
-	log.Println("user is already exist")
-	http.Redirect(w, r, fmt.Sprintln(FrontendURL+"/login"), http.StatusSeeOther)
+
 	return
 }
 
