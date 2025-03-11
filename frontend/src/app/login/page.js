@@ -32,6 +32,7 @@ export default function Login() {
 
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const submitHandler = () => {
     const jsonfiedLoginVal = JSON.stringify({
@@ -90,10 +91,14 @@ export default function Login() {
           <input
             value={passwordValue}
             onChange={(evt) => setPasswordValue(evt.target.value)}
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter your password here"
             className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs"
           />
+          <p 
+            onClick={() => setShowPassword(!showPassword)}
+            className="text-[10px] md:text-xs text-[#707070] hover:underline hover:cursor-pointer"
+          >{showPassword ? "Hide password" : "Show password"}</p>
         </div>
         <div className="flex justify-between items-center w-full">
           <button

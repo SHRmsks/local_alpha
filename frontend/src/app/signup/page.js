@@ -12,6 +12,8 @@ export default function Signup() {
   const [nameValue, setNameValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
+  const [confirmValue, setConfirmValue] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="bg-iper-white w-full h-screen flex flex-col justify-center items-center">
@@ -22,7 +24,7 @@ export default function Signup() {
           className="size-10 md:size-14 lg:size-16 lg:mb-1"
         />
         <h1 className="font-krub font-extrabold text-2xl md:text-3xl lg:text-4xl">
-          Welcome to IPER
+          New to IPER?
         </h1>
         <div className="w-full flex flex-col gap-1">
           <p className="text-sm">NAME</p>
@@ -49,10 +51,21 @@ export default function Signup() {
           <input
             value={passwordValue}
             onChange={(evt) => setPasswordValue(evt.target.value)}
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter your password here"
             className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs"
           />
+          <input
+            value={confirmValue}
+            onChange={(evt) => setConfirmValue(evt.target.value)}
+            type={showPassword ? "text" : "password"}
+            placeholder="Confirm password"
+            className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs"
+          />
+          <p 
+            onClick={() => setShowPassword(!showPassword)}
+            className="text-[10px] md:text-xs text-[#707070] hover:underline hover:cursor-pointer"
+          >{showPassword ? "Hide password" : "Show password"}</p>
         </div>
         <div className="flex justify-between items-center w-full">
           <button
@@ -65,7 +78,7 @@ export default function Signup() {
             onClick={() => {}}
             className="bg-iper-blue w-20 md:w-24 py-2 md:py-2.5 rounded-lg text-iper-white text-[10px] md:text-xs transition hover:bg-iper-gold"
           >
-            Login
+            Sign Up
           </button>
         </div>
 
