@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	Api "iperuranium.com/backend/Main/api"
+	graphql "iperuranium.com/backend/Main/graphQL"
 )
 
 func main() {
@@ -100,7 +101,7 @@ func main() {
 	}
 
 	DBinfo := Api.LoginInfo(mongoClient.Database("User"), psqlClient, &mongoSession, googleClientSecret, linkedinClientSecret)
-
+	dashBoardInfo := graphql.DashboardInfoHandler(mongoClient.Database("User"), psqlClient, &mongoSession)
 	// middleWare
 	r.Use(middleware.Logger)
 	// Cors set up
@@ -130,15 +131,15 @@ func main() {
 			privateURL.Use(Api.AuthenticateProtector("http://localhost:3000/"))
 			privateURL.Use(Api.MiddleWareOAUTH)
 
-			// privateURL.Use(Api.MiddleWareLOGIN(mongoClient.Database("User"), psqlClient))
-
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/linkedin/callback", func(w http.ResponseWriter, r *http.Request) {})
+			privateURL.Options("/dashboardSearch", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Post("/login", DBinfo.LoginHandler)
 			privateURL.Post("/signup", DBinfo.SignupHandler)
 			privateURL.Get("/callback", DBinfo.GoogleCallbackHandler)
+			privateURL.Get("/dashboardSearch", dashBoardInfo.DashboardSearchHandler)
 			privateURL.Get("/linkedin/callback", DBinfo.LinkedInCallbackHandler)
 
 		},

@@ -93,18 +93,18 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 		MaxAge:   86400,
-		SameSite: http.SameSiteLaxMode,
-		Secure:   false,
+
+		Secure: false,
 	})
 
-	//send response in JSON format
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Login Successful",
-
-		"uuid": UserID.String(),
-	})
+	// //send response in JSON format
+	// w.Header().Set("Content-Type", "application/json")
+	// w.WriteHeader(http.StatusOK)
+	// json.NewEncoder(w).Encode(map[string]interface{}{
+	// 	"message": "Login Successful",
+	// 	"uuid": UserID.String(),
+	// })
+	http.Redirect(w, r, fmt.Sprintf("http://localhost:3000/dashboard?session=%v", UserID.String()), http.StatusSeeOther)
 
 }
 
@@ -148,6 +148,7 @@ func (h *DBInfo) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 // this is for the linkedin server
 func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
+
 	var linkedInconfig = &oauth2.Config{
 		ClientID:     "77nme6nzlhmnlv",
 		ClientSecret: h.linkedinClientSecret,
@@ -237,14 +238,15 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 			Secure:   false,
 		})
 
-	http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("http://localhost:3000/dashboard?session=%v", uuid1.String()), http.StatusSeeOther)
 
 }
 
 // this is for google server
 func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	//
 	var googleconfig = &oauth2.Config{
-		ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
+		ClientID:     "43488699135-6muejl3ggsu962hcav4qc1shuo3jesat.apps.googleusercontent.com",
 		ClientSecret: h.googleClientSecret,
 		RedirectURL:  "http://localhost:5050/callback",
 		Endpoint:     google.Endpoint,
@@ -317,6 +319,6 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   86400,
 			Secure:   false,
 		})
-	http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("http://localhost:3000/dashboard?session=%v", uuid1.String()), http.StatusSeeOther)
 
 }
