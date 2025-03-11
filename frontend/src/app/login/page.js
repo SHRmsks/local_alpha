@@ -30,8 +30,10 @@ export default function Login() {
     );
   };
 
+  const [nameValue, setNameValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
+  const [signup, setSignup] = useState(false);
 
   const submitHandler = () => {
     const jsonfiedLoginVal = JSON.stringify({
@@ -73,8 +75,18 @@ export default function Login() {
           className="size-10 md:size-14 lg:size-16 lg:mb-1"
         />
         <h1 className="font-krub font-extrabold text-2xl md:text-3xl lg:text-4xl">
-          Welcome to IPER
+          {signup ? "New to IPER?" : "Welcome to IPER"}
         </h1>
+        { signup && <div className="w-full flex flex-col gap-1">
+          <p className="text-sm">NAME</p>
+          <input
+            value={nameValue}
+            onChange={(evt) => setNameValue(evt.target.value)}
+            type="text"
+            placeholder="[First Name] [Last Name]"
+            className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs "
+          />
+        </div> }
         <div className="w-full flex flex-col gap-1">
           <p className="text-sm">EMAIL</p>
           <input
@@ -96,17 +108,21 @@ export default function Login() {
           />
         </div>
         <div className="flex justify-between items-center w-full">
-          <button className="text-[10px] md:text-xs text-[#707070] hover:underline">
+          <button
+            className="text-[10px] md:text-xs text-[#707070] hover:underline"
+            style={{ visibility: signup ? "hidden" : "visible" }}
+          >
             Forgot password?
           </button>
           <button
-            onClick={submitHandler}
+            onClick={signup ? () => {}/*placeholder for signup*/ : submitHandler}
             className="bg-iper-blue w-20 md:w-24 py-2 md:py-2.5 rounded-lg text-iper-white text-[10px] md:text-xs transition hover:bg-iper-gold"
           >
             Login
           </button>
         </div>
-        <div className="grid grid-cols-3 items-center my-[-6px]">
+
+        {!signup && <><div className="grid grid-cols-3 items-center my-[-6px]">
           <hr className="w-28 md:w-32 lg:w-40 border-t border-iper-blue justify-self-start" />
           <p className="text-xs md:text-sm text-iper-blue justify-self-center">
             OR
@@ -115,17 +131,17 @@ export default function Login() {
         </div>
 
         <div className="flex justify-center items-center gap-6 w-full">
-            <button
-              onClick={googleLogin}
-              className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full transition hover:scale-[1.05]"
-            >
-              <Image
-                src={logoGoogle}
-                alt="Google Logo"
-                className="size-4 md:size-5"
-              />
-              <p>Google</p>
-            </button>
+          <button
+            onClick={googleLogin}
+            className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full transition hover:scale-[1.05]"
+          >
+            <Image
+              src={logoGoogle}
+              alt="Google Logo"
+              className="size-4 md:size-5"
+            />
+            <p>Google</p>
+          </button>
           <button
             onClick={linkedInLogin}
             className="flex items-center justify-center gap-2 text-[9px] md:text-[11px] h-9 md:h-10 px-3 bg-iper-white rounded-md border w-full transition hover:scale-[1.05]"
@@ -137,14 +153,17 @@ export default function Login() {
             />
             <p>LinkedIn</p>
           </button>
-        </div>
+        </div></>}
 
         <div className="flex justify-center items-center gap-6 w-full">
           <p className="text-[10px] md:text-xs text-[#707070]">
-            Don't have an account?
+            {signup ? "Already have an account?" : "Don't have an account?"}
           </p>
-          <button className="text-xs md:text-sm text-iper-blue font-semibold transition hover:text-iper-gold">
-            SIGN UP
+          <button
+            onClick={() => setSignup(!signup)}
+            className="text-xs md:text-sm text-iper-blue font-semibold transition hover:text-iper-gold"
+          >
+            {signup ? "LOGIN" : "SIGN UP"}
           </button>
         </div>
       </div>
