@@ -76,8 +76,8 @@ export default function Login() {
             <p className="text-sm">PASSWORD</p>
             <input
               type="text"
-              value={password}
-              onChange={(e) => setPassword("•".repeat(e.target.value.length))}
+              value={"•".repeat(password.length)}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password here"
               className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs"
             />
