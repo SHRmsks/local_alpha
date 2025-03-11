@@ -17,7 +17,7 @@ export default function Signup() {
   const [legitPsswrd, setLegitPsswrd] = useState(true);
   const [legitRepeat, setlegitRepeat] = useState(true);
 
-  useEffect(() => {
+  const checkPassword = () => {
     if (passwordValue !== "") {
       if (
         passwordValue.length < 6 ||
@@ -39,7 +39,7 @@ export default function Signup() {
         setlegitRepeat(true);
       }
     }
-  }, [passwordValue, confirmValue]);
+  };
   const signupHandler = () => {
     setNameValue("");
     setEmailValue("");
@@ -110,18 +110,19 @@ export default function Signup() {
             {legitPsswrd && legitRepeat ? null : legitPsswrd ? (
               legitRepeat ? null : (
                 <p className="text-[#FF4949] text-[10px]">
-                  password is not matched
+                  Password does not match
                 </p>
               )
             ) : (
               <p className="text-[#FF4949] text-[10px] break-words text-pretty">
-                password must be longer than 6 digits and less than 15 digits
+                Password must be longer than 6 characters and less than 15 characters
                 with at least one uppercase and lowercase{" "}
               </p>
             )}
           </div>
           <input
             value={passwordValue}
+            onBlur={checkPassword}
             onChange={(evt) => setPasswordValue(evt.target.value)}
             type={showPassword ? "text" : "password"}
             placeholder="Enter your password here"
@@ -129,6 +130,7 @@ export default function Signup() {
           />
           <input
             value={confirmValue}
+            onBlur={checkPassword}
             onChange={(evt) => setConfirmValue(evt.target.value)}
             type={showPassword ? "text" : "password"}
             placeholder="Confirm password"
