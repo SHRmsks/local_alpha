@@ -99,7 +99,6 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Login Successful",
 		"uuid":    UserID.String(),
 	})
-	// http.Redirect(w, r, fmt.Sprintf("http://localhost:3000/dashboard?session=%v", UserID.String()), http.StatusSeeOther)
 
 }
 
