@@ -59,7 +59,7 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	username := user.UserName
 	password := user.Password
 	var UserID uuid.UUID
-	err1 := sqltable.QueryRow(ctxt, "SELECT uuid FROM userinfo WHERE username=$1 AND password=$2", username, password).Scan(&UserID)
+	err1 := sqltable.QueryRow(ctxt, "SELECT uuid FROM userinfo WHERE email=$1 AND password=$2", username, password).Scan(&UserID)
 	if err1 != nil {
 		if err1 == pgx.ErrNoRows {
 			log.Println("user is not found")
@@ -97,14 +97,14 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Secure: false,
 	})
 
-	// //send response in JSON format
-	// w.Header().Set("Content-Type", "application/json")
-	// w.WriteHeader(http.StatusOK)
-	// json.NewEncoder(w).Encode(map[string]interface{}{
-	// 	"message": "Login Successful",
-	// 	"uuid": UserID.String(),
-	// })
-	http.Redirect(w, r, fmt.Sprintf("http://localhost:3000/dashboard?session=%v", UserID.String()), http.StatusSeeOther)
+	//send response in JSON format
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Login Successful",
+		"uuid":    UserID.String(),
+	})
+	// http.Redirect(w, r, fmt.Sprintf("http://localhost:3000/dashboard?session=%v", UserID.String()), http.StatusSeeOther)
 
 }
 
