@@ -15,6 +15,39 @@ export default function Signup() {
   const [confirmValue, setConfirmValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const signupHandler = () => {
+    setNameValue("");
+    setEmailValue("");
+    setPasswordValue("");
+    const jsonfiedSignupVal = JSON.stringify({
+      userName: nameValue.toString().trim(),
+      password: passwordValue.toString().trim(),
+      email: emailValue.toString().trim(),
+    });
+    fetch("http://localhost:5050/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonfiedSignupVal,
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Connection error");
+        }
+        return res.json();
+      })
+      .then((json) => {
+        if (json.message !== "Successful") {
+          console.log("user is existed");
+        }
+        router.push("/login");
+        return;
+      })
+      .catch((err) => console.error(err));
+  };
+
   return (
     <div className="bg-iper-white w-full h-screen flex flex-col justify-center items-center">
       <div className="bg-white rounded-[40px] p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit shadow-md flex flex-col justify-center items-center gap-4 lg:gap-6">
@@ -62,10 +95,12 @@ export default function Signup() {
             placeholder="Confirm password"
             className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs"
           />
-          <p 
+          <p
             onClick={() => setShowPassword(!showPassword)}
             className="text-[10px] md:text-xs text-[#707070] hover:underline hover:cursor-pointer"
-          >{showPassword ? "Hide password" : "Show password"}</p>
+          >
+            {showPassword ? "Hide password" : "Show password"}
+          </p>
         </div>
         <div className="flex justify-between items-center w-full">
           <button
@@ -75,7 +110,7 @@ export default function Signup() {
             Forgot password?
           </button>
           <button
-            onClick={() => {}}
+            onClick={signupHandler}
             className="bg-iper-blue w-20 md:w-24 py-2 md:py-2.5 rounded-lg text-iper-white text-[10px] md:text-xs transition hover:bg-iper-gold"
           >
             Sign Up
@@ -87,7 +122,7 @@ export default function Signup() {
             Already have an account?
           </p>
           <button
-            onClick={() => router.push('/login')}
+            onClick={() => router.push("/login")}
             className="text-xs md:text-sm text-iper-blue font-semibold transition hover:text-iper-gold"
           >
             LOGIN
