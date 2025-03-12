@@ -38,12 +38,15 @@ export default function Signup() {
       } else {
         setlegitRepeat(true);
       }
+    } else {
+      setlegitRepeat(true);
     }
   };
   const signupHandler = () => {
     setNameValue("");
     setEmailValue("");
     setPasswordValue("");
+    setConfirmValue("");
     const jsonfiedSignupVal = JSON.stringify({
       userName: nameValue.toString().trim(),
       password: passwordValue.toString().trim(),
