@@ -4,7 +4,6 @@ export default function middleware(r) {
   if (
     r.nextUrl.pathname.startsWith("/login") ||
     r.nextUrl.pathname.startsWith("/signup")
-    || r.nextUrl.pathname.startsWith("/confirmation") // temp
   ) {
     return NextResponse.next();
   }
