@@ -1,7 +1,7 @@
 "use client"
 import Sidebar from "@/components/sidebar/sidebar";
 import { useSearchParams } from "next/navigation";
-import "@/app/global.css"
+import "@/app/globals.css"
 
 
 

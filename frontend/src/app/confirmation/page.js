@@ -1,6 +1,6 @@
 "use client";
 
-import "@/app/global.css";
+import "@/app/globals.css";
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
 

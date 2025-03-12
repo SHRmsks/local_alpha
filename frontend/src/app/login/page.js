@@ -1,6 +1,6 @@
 "use client";
 
-import "@/app/global.css";
+import "@/app/globals.css";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
