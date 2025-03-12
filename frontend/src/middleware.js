@@ -4,16 +4,14 @@ export default function middleware(r) {
   if (
     r.nextUrl.pathname.startsWith("/login") ||
     r.nextUrl.pathname.startsWith("/signup")
+    || r.nextUrl.pathname.startsWith("/confirmation") // temp
   ) {
     return NextResponse.next();
   }
-  console.log("1");
 
   if (r.cookies.get("session_token")) {
-    console.log("2");
     return NextResponse.next();
   }
-  console.log("3");
   return NextResponse.redirect(new URL("/login", r.url));
 }
 
