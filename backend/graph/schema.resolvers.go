@@ -6,66 +6,50 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"log"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"iperuranium.com/backend/graph/model"
 )
 
-// Dashboard is the resolver for the dashboard field.
-func (r *mutationResolver) Dashboard(ctx context.Context, id string) (*model.DashBoard, error) {
-	panic(fmt.Errorf("not implemented: Dashboard - dashboard"))
-}
-
-// Dashboard is the resolver for the dashboard field.
-func (r *queryResolver) Dashboard(ctx context.Context, id string) (*model.DashBoard, error) {
-	panic(fmt.Errorf("not implemented: Dashboard - dashboard"))
-}
-
-// Mutation returns MutationResolver implementation.
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
-
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *queryResolver) DashBoard(ctx context.Context, id string) (*model.DashBoard, error) {
-	return &model.DashBoard{
-		Title: "test",
-	}, nil
-}
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	Collection := r.MongoDB.Database("GraphQL").Collection("user")
-	redisclient := r.RedisClient
+// User is the resolver for the user field.
+func (r *dashBoardResolver) User(ctx context.Context, obj *model.DashBoard, id string) (*model.User, error) {
+	collection := r.Resolver.MongoDB.Database("GraphQL").Collection("user")
+	redisclient := r.Resolver.RedisClient
 	var usr model.User
 
 	result, err := redisclient.HGetAll(ctx, id).Result()
 	if err != nil || len(result) == 0 {
-		log.Println("redis doesn't have this person info yet, fetching now ...")
-		err1 := Collection.FindOne(ctx, bson.M{"user_id": id}).Decode(&usr)
+		log.Println("Redis miss, fetching from MongoDB.")
+		err1 := collection.FindOne(ctx, bson.M{"user_id": id}).Decode(&usr)
 		if err1 != nil {
 			return nil, err1
 		}
-		log.Println("setting up redis now")
 		redisclient.HSet(ctx, id, map[string]interface{}{
 			"username":   usr.Username,
-			"Occupation": usr.Occupation,
-			"Networks":   usr.Networks,
-			"Posts":      usr.Posts,
+			"occupation": usr.Occupation,
+			"networks":   usr.Networks,
+			"posts":      usr.Posts,
 		})
-		return &usr, nil
+	} else {
+		usr.Username = result["username"]
+		// Fetch other details from Redis if necessary
 	}
-
-	usr.Username = result["username"]
-	// Populate other fields if needed
 	return &usr, nil
 }
-*/
+
+// Dashboard is the resolver for the dashboard field.
+func (r *queryResolver) Dashboard(ctx context.Context, id string) (*model.DashBoard, error) {
+	return &model.DashBoard{
+		Title: "test",
+	}, nil
+}
+
+// DashBoard returns DashBoardResolver implementation.
+func (r *Resolver) DashBoard() DashBoardResolver { return &dashBoardResolver{r} }
+
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+
+type dashBoardResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

@@ -35,15 +35,10 @@ model:
 
 # Where should the resolver implementations go?
 resolver:
-  layout: single-file
-  filename: graph/resolver.go # Only other option is "single-file."
-
-  # Only for single-file layout:
-  # filename: graph/resolver.go
-
-  # Only for follow-schema layout:
+  layout: follow-schema
   dir: graph
   filename_template: "{name}.resolvers.go"
+
 
   # Optional: turn on to not generate template comments above resolvers
   # omit_template_comment: false
@@ -125,6 +120,11 @@ autobind:
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
+  DashBoard:
+    fields:
+      user:
+        resolver: true
+
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID

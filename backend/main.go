@@ -15,9 +15,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-redis/redis/v9"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lpernett/godotenv"
-	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	Api "iperuranium.com/backend/Main/api"
@@ -129,7 +129,8 @@ func main() {
 	executableSchema := graph.NewExecutableSchema(graph.Config{
 		Resolvers: gqlResolver,
 	})
-	gqlHandler := handler.NewDefaultServer(executableSchema)
+	gqlHandler := handler.NewDefaultServer(executableSchema) // this will be replaced by New once the playground is not used
+
 	// middleWare
 	r.Use(middleware.Logger)
 	// Cors set up
@@ -148,7 +149,7 @@ func main() {
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT)}, // alllow any public url
+					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)}, // alllow any public url
 					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 					AllowCredentials: true,
@@ -156,14 +157,14 @@ func main() {
 				},
 			),
 			)
-			// privateURL.Use(Api.AuthenticateProtector("http://localhost:3000/"))
-			// privateURL.Use(Api.MiddleWareOAUTH)
+			privateURL.Use(Api.AuthenticateProtector("http://localhost:3000/"))
+			privateURL.Use(Api.MiddleWareOAUTH)
 			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/linkedin/callback", func(w http.ResponseWriter, r *http.Request) {})
-			// privateURL.Handle("/", playground.Handler("GraphQL playground", "/Search"))
+
 			privateURL.Handle("/", playground.Handler("GraphQL playground", "/Search"))
 			privateURL.Post("/login", DBinfo.LoginHandler)
 			privateURL.Post("/signup", DBinfo.SignupHandler)

@@ -21,6 +21,7 @@ type Follow struct {
 }
 
 type Mutation struct {
+	Dashboard *DashBoard `json:"dashboard,omitempty"`
 }
 
 type Networks struct {

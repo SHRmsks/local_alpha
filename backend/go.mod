@@ -7,9 +7,9 @@ require github.com/go-chi/chi/v5 v5.2.1 // direct
 require (
 	github.com/99designs/gqlgen v0.17.66
 	github.com/go-chi/cors v1.2.1
+	github.com/go-redis/redis/v9 v9.0.0-rc.2
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.2
-	github.com/redis/go-redis/v9 v9.7.1
 	go.mongodb.org/mongo-driver v1.17.3
 	golang.org/x/crypto v0.36.0
 	golang.org/x/oauth2 v0.27.0
@@ -33,6 +33,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/onsi/gomega v1.36.2 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/cli/v2 v2.27.5 // indirect
