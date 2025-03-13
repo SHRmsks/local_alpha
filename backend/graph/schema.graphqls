@@ -1,0 +1,50 @@
+schema {
+  query: Query
+}
+type Query {
+  dashboard(id: ID!): DashBoard
+}
+type Mutation {
+  dashboard(id: ID!): DashBoard
+}
+type DashBoard {
+  user(id: ID!): User!
+  title: String!
+}
+
+type User {
+  username: String!
+  occupation: Company!
+  companyFollows: Follow!
+  networks: Networks!
+  posts: [Post]!
+  # subscription: Subscription!
+  # notes: Notes
+  # history: histories
+}
+
+type Company {
+  companyName: String!
+  companyID: String!
+  location: String!
+  intro: String!
+  icon: String!
+}
+
+type Follow {
+  userID: ID!
+  usersFollow: [User]!
+}
+type Networks {
+  userID: ID!
+  companys: [Company]!
+}
+type Post {
+  postTitle: String!
+  postID: ID!
+  postUser: User!
+  userID: ID!
+  body: String!
+  comments: [String]!
+  followers: [User!]
+}

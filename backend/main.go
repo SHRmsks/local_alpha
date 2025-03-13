@@ -10,15 +10,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-redis/redis/v9"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lpernett/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	Api "iperuranium.com/backend/Main/api"
-	graphql "iperuranium.com/backend/Main/graphQL"
+	graph "iperuranium.com/backend/graph"
 )
 
 func main() {
@@ -38,10 +41,13 @@ func main() {
 	}
 
 	// go rountine to initilize the database
+	/*all the credentials we needed */
 	Mongodb := os.Getenv("DBURL")
 	PSQLdb := os.Getenv("PSQLURL")
 	googleClientSecret := os.Getenv("googleClientSecret")
 	linkedinClientSecret := os.Getenv("linkedinClientSecret")
+	redisAddr := os.Getenv("redisAddr")
+	redisPass := os.Getenv("redisPassword")
 
 	r := chi.NewRouter()
 
@@ -54,9 +60,22 @@ func main() {
 	var psqlClient *pgxpool.Pool
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 	done := make(chan struct{})
 	var timeout = time.After(45 * time.Second)
+	var rdb *redis.Client
+	go func() {
+		defer wg.Done()
+		rdb = redis.NewClient(&redis.Options{
+			Addr:         redisAddr,
+			Password:     redisPass,
+			DB:           0,
+			DialTimeout:  10 * time.Second,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 20 * time.Second,
+		})
+
+	}()
 	// Initialize mongo db database
 	go func() {
 		defer wg.Done()
@@ -90,7 +109,7 @@ func main() {
 
 	select {
 	case <-done:
-		log.Println("connection Successfully")
+		log.Println("connections all Successful")
 
 	case <-timeout:
 		log.Fatalf("Connection to Database timed out")
@@ -99,9 +118,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("Having trouble starting mongo Session")
 	}
+	gqlResolver := &graph.Resolver{
+		PsqlPool:     psqlClient,
+		MongoDB:      mongoClient,
+		MongoSession: &mongoSession,
+		RedisClient:  rdb,
+	}
 
 	DBinfo := Api.LoginInfo(mongoClient.Database("User"), psqlClient, &mongoSession, googleClientSecret, linkedinClientSecret)
-	dashBoardInfo := graphql.DashboardInfoHandler(mongoClient.Database("User"), psqlClient, &mongoSession)
+	executableSchema := graph.NewExecutableSchema(graph.Config{
+		Resolvers: gqlResolver,
+	})
+	gqlHandler := handler.NewDefaultServer(executableSchema) // this will be replaced by New once the playground is not used
+
 	// middleWare
 	r.Use(middleware.Logger)
 	// Cors set up
@@ -120,7 +149,7 @@ func main() {
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT)}, // alllow any public url
+					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)}, // alllow any public url
 					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 					AllowCredentials: true,
@@ -130,16 +159,17 @@ func main() {
 			)
 			privateURL.Use(Api.AuthenticateProtector("http://localhost:3000/"))
 			privateURL.Use(Api.MiddleWareOAUTH)
-
+			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/linkedin/callback", func(w http.ResponseWriter, r *http.Request) {})
-			privateURL.Options("/dashboardSearch", func(w http.ResponseWriter, r *http.Request) {})
+
+			privateURL.Handle("/", playground.Handler("GraphQL playground", "/Search"))
 			privateURL.Post("/login", DBinfo.LoginHandler)
 			privateURL.Post("/signup", DBinfo.SignupHandler)
 			privateURL.Get("/callback", DBinfo.GoogleCallbackHandler)
-			privateURL.Get("/dashboardSearch", dashBoardInfo.DashboardSearchHandler)
+			privateURL.Handle("/Search", gqlHandler)
 			privateURL.Get("/linkedin/callback", DBinfo.LinkedInCallbackHandler)
 
 		},

@@ -149,7 +149,7 @@ export default function Login() {
 
         <div className="flex justify-center items-center gap-6 w-full">
           <p className="text-[10px] md:text-xs text-[#707070]">
-            Don't have an account?
+            Don&apos;t have an account?
           </p>
           <button
             onClick={() => router.push('/signup')}
