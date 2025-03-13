@@ -7,13 +7,10 @@ export default function middleware(r) {
   ) {
     return NextResponse.next();
   }
-  console.log("1");
 
   if (r.cookies.get("session_token")) {
-    console.log("2");
     return NextResponse.next();
   }
-  console.log("3");
   return NextResponse.redirect(new URL("/login", r.url));
 }
 

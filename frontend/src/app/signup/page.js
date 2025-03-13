@@ -1,15 +1,16 @@
 "use client";
 
-import "@/app/global.css";
+import "@/app/globals.css";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
 
 export default function Signup() {
   const router = useRouter();
 
-  const [nameValue, setNameValue] = useState("");
+  const [firstValue, setFirstValue] = useState("");
+  const [lastValue, setLastValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [confirmValue, setConfirmValue] = useState("");
@@ -38,14 +39,18 @@ export default function Signup() {
       } else {
         setlegitRepeat(true);
       }
+    } else {
+      setlegitRepeat(true);
     }
   };
   const signupHandler = () => {
-    setNameValue("");
+    setFirstValue("");
+    setLastValue("");
     setEmailValue("");
     setPasswordValue("");
+    setConfirmValue("");
     const jsonfiedSignupVal = JSON.stringify({
-      userName: nameValue.toString().trim(),
+      userName: (firstValue.toString()+" "+lastValue.toString()).trim(),
       password: passwordValue.toString().trim(),
       email: emailValue.toString().trim(),
     });
@@ -67,7 +72,7 @@ export default function Signup() {
         if (json.message !== "Successful") {
           console.log("user is existed");
         }
-        router.push("/login");
+        router.push({ pathname: "/confirmation", query: {name: firstValue}}, '/confirmation');
         return;
       })
       .catch((err) => console.error(err));
@@ -84,15 +89,27 @@ export default function Signup() {
         <h1 className="font-krub font-extrabold text-2xl md:text-3xl lg:text-4xl">
           New to IPER?
         </h1>
-        <div className="w-full flex flex-col gap-1">
-          <p className="text-sm">NAME</p>
-          <input
-            value={nameValue}
-            onChange={(evt) => setNameValue(evt.target.value)}
+        <div className="w-full flex flex-row gap-1">
+          <div className="flex-col w-full">
+            <p className="text-sm">NAME</p>
+            <input
+            value={firstValue}
+            onChange={(evt) => setFirstValue(evt.target.value)}
             type="text"
-            placeholder="[First Name] [Last Name]"
+            placeholder="First Name"
             className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs "
-          />
+            />
+          </div>
+          <div className="flex-col w-full">
+            <p className="text-sm">​</p>
+            <input
+            value={lastValue}
+            onChange={(evt) => setLastValue(evt.target.value)}
+            type="text"
+            placeholder="Last Name"
+            className="border-2 px-3 h-8 md:h-9 rounded-lg w-full bg-iper-white text-[10px] md:text-xs "
+            />
+          </div>
         </div>
         <div className="w-full flex flex-col gap-1">
           <p className="text-sm">EMAIL</p>
@@ -115,7 +132,7 @@ export default function Signup() {
               )
             ) : (
               <p className="text-[#FF4949] text-[10px] break-words text-pretty">
-                Password must be longer than 6 characters and less than 15 characters
+                Password must be longer than 6 characters and less than 30 characters
                 with at least one uppercase and lowercase{" "}
               </p>
             )}
@@ -150,7 +167,8 @@ export default function Signup() {
               !legitRepeat ||
               passwordValue === "" ||
               confirmValue === "" || 
-              nameValue === ""||
+              firstValue === ""||
+              lastValue === "" ||
               emailValue===""
             }
             onClick={signupHandler}

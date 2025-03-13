@@ -1,6 +1,6 @@
 "use client";
 
-import "./global.css";
+import "./globals.css";
 
 export default function Home() {
     return <div>Hello world!</div>;
