@@ -124,7 +124,6 @@ models:
     fields:
       user:
         resolver: true
-
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID

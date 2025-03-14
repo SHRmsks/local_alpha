@@ -10,7 +10,7 @@ const session_id = useSearchParams().get('session');
 console.log("session_id", session_id)
     return (
         <div>
-            <Sidebar />
+            <Sidebar id={session_id}/>
         </div>
     )
 }

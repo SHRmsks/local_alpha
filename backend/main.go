@@ -36,10 +36,6 @@ func main() {
 	frontEND_PORT := os.Getenv("FRONTEND_PORT")
 	log.Println("frontend port: ", frontEND_PORT)
 	domainName := os.Getenv("DomainName")
-	if domainName == "" {
-		domainName = ""
-	}
-
 	// go rountine to initilize the database
 	/*all the credentials we needed */
 	Mongodb := os.Getenv("DBURL")
@@ -145,11 +141,12 @@ func main() {
 			},
 		))
 	})
+
 	r.Group(
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)}, // alllow any public url
+					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), "https://www.iperuranium.com", fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)}, // alllow any public url
 					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 					AllowCredentials: true,
@@ -157,8 +154,8 @@ func main() {
 				},
 			),
 			)
-			privateURL.Use(Api.AuthenticateProtector("http://localhost:3000/"))
-			privateURL.Use(Api.MiddleWareOAUTH)
+			privateURL.Use(Api.AuthenticateProtector("https://www.iperuranium.com"))
+
 			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})
