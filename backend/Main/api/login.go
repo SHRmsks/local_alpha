@@ -157,7 +157,8 @@ func (h *DBInfo) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 // this is for the linkedin server
 func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request) {
-
+	frontendURL := r.Context().Value("FrontendURL").(string)
+	log.Println("linkedin call", frontendURL)
 	var linkedInconfig = &oauth2.Config{
 		ClientID:     "77nme6nzlhmnlv",
 		ClientSecret: h.linkedinClientSecret,
@@ -244,9 +245,12 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 			Path:     "/",
 			HttpOnly: true,
 			MaxAge:   86400,
-			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+			// Secure:   true,
 		})
-
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	// http.Redirect(w, r, fmt.Sprintf("https://www.iperuranium.com/dashboard?session=%v", uuid1.String()), http.StatusSeeOther)
 	http.Redirect(w, r, fmt.Sprintf("http://localhost:3000/dashboard?session=%v", uuid1.String()), http.StatusSeeOther)
 
 }
@@ -254,6 +258,8 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 // this is for google server
 func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	//
+	frontendURL := r.Context().Value("FrontendURL").(string)
+	log.Println("google call", frontendURL)
 	var googleconfig = &oauth2.Config{
 		ClientID:     "43488699135-6muejl3ggsu962hcav4qc1shuo3jesat.apps.googleusercontent.com",
 		ClientSecret: h.googleClientSecret,
@@ -326,8 +332,12 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 			Path:     "/",
 			MaxAge:   86400,
-			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+			// Secure:   true,
 		})
+	w.Header().Set("Access-Control-Allow-Origin", frontendURL)
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	// http.Redirect(w, r, fmt.Sprintf("https://www.iperuranium.com/dashboard?session=%v", uuid1.String()), http.StatusSeeOther)
 	http.Redirect(w, r, fmt.Sprintf("http://localhost:3000/dashboard?session=%v", uuid1.String()), http.StatusSeeOther)
 
 }

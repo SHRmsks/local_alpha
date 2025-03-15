@@ -21,7 +21,7 @@ func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctxt := context.WithValue(r.Context(), "FrontendURL", frontendURL)
 			log.Println("frontendURL", frontendURL)
-			if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" || r.URL.Path == "/signup" || r.Method == "OPTIONS" {
+			if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" || r.URL.Path == "/signup" {
 				next.ServeHTTP(w, r.WithContext(ctxt))
 				return
 			}
@@ -35,37 +35,13 @@ func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
 					json.NewEncoder(w).Encode(map[string]string{"error": "Unauthorized"})
 					return
 				}
-				http.Redirect(w, r, fmt.Sprintln(frontendURL+"login"), http.StatusBadRequest)
+				http.Redirect(w, r, fmt.Sprintln(frontendURL+"/login"), http.StatusBadRequest)
 				return
 			}
 			usertoken := cookie.Value
 			log.Println("user is found", usertoken)
-
 			next.ServeHTTP(w, r.WithContext(ctxt))
 
 		})
 	}
-}
-
-// using Google or LinkedIn instead
-
-func MiddleWareOAUTH(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		log.Println("middlewareOAUTH is working")
-		if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" || r.URL.Path == "/signup" || r.Method == "OPTIONS" {
-			next.ServeHTTP(w, r)
-			return
-		}
-		cookie, err := r.Cookie("session_token")
-		if err != nil {
-			log.Printf("Not signed in yet")
-			return
-		}
-		usertoken := cookie.Value
-		log.Println("user is found", usertoken)
-		next.ServeHTTP(w, r)
-
-		// http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusFound)
-	})
 }

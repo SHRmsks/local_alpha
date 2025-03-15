@@ -1,13 +1,37 @@
 
 import Image from 'next/image'
-
+import { useEffect, useState  } from 'react'
 // Ignoring the fact that the image name and location need props for initial design
 // Also ignoring that everything is secretly a link
-export default function Sidebar() {
+export default function Sidebar({id}) {
+  const [userName, setUserName] = useState("")
+    useEffect(()=> {
+   const query = `query {
+  dashboard(id: "${id}") {
+    title
+    user(id: "${id}") {
+      username
+    }
+  }
+}`;
+console.log("my query: ", query)
+      fetch("http://localhost:5050/Search", {
+        method: "POST",
+        credentials: "include",
+        headers:{
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({query})
+      }).then(response => response.json()).then(data => {
+      setUserName(  data.data.dashboard.user.username)
+        // console.log("name", userNameRef.current)
+
+        console.log("data", JSON.stringify(data))}).catch((err)=> console.error(err))
+    }, [])
     return (
       <div className="flex flex-col space-y-5 w-[200px]">
         <div
-          id="user"
+        
           className="bg-[#FFFEFA] flex flex-col items-center gap-2 rounded-lg shadow-md pt-5 pb-4 pl-4 pr-4"
         >
           <Image
@@ -17,7 +41,7 @@ export default function Sidebar() {
             alt="Profile Picture"
             className="rounded-[50%]"
           />
-          <p className="font-bold text-2xl">[Name]</p>
+          <p  className="font-bold text-2xl">{userName}</p>
           <p>[LOCATION]</p>
           <button className="w-full rounded-lg border-[#0954A5] border-[1px] text-[#0954A5] font-bold p-2">
             MY DASHBOARD
