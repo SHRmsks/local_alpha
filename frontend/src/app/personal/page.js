@@ -1,5 +1,5 @@
 "use client"
-import Sidebar from "@/components/sidebar";
+import Sidebar from "@/components/sidebar/sidebar";
 import PersonalProf from "@/components/personalProf/personalProf";
 import "@/app/global.css"
 const Personal =  () =>{
