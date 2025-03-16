@@ -1,6 +1,6 @@
 "use client"
 import Sidebar from "@/components/sidebar/sidebar"
-import "@/app/global.css"
+import "@/app/globals.css"
 const Dashboard =  ()=>{
     return (
         <div>
