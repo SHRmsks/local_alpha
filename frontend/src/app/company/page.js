@@ -1,6 +1,6 @@
 "use client"
-import Sidebar from "@/components/sidebar";
-import CompanyProf from "@/components/companyProf";
+import Sidebar from "@/components/sidebar/sidebar";
+import CompanyProf from "@/components/companyProf/companyProf";
 import "@/app/global.css"
 const Company =  () =>{
     return (
