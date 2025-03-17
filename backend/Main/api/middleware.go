@@ -2,6 +2,7 @@ package Api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -27,38 +28,20 @@ func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
 			log.Println("authenticateProtector is verifying")
 			cookie, err := r.Cookie("session_token")
 			if err != nil || cookie.Value == "" {
-				log.Printf("Session_ token missed, Not signed in yet")
 
-				http.Redirect(w, r, fmt.Sprintln(frontendURL+"login"), http.StatusBadRequest)
+				log.Printf("Session_ token missed, Not signed in yet")
+				if r.Header.Get("Content-Type") == "application/json" {
+					w.WriteHeader(http.StatusUnauthorized)
+					json.NewEncoder(w).Encode(map[string]string{"error": "Unauthorized"})
+					return
+				}
+				http.Redirect(w, r, fmt.Sprintln(frontendURL+"/login"), http.StatusBadRequest)
 				return
 			}
 			usertoken := cookie.Value
 			log.Println("user is found", usertoken)
-
 			next.ServeHTTP(w, r.WithContext(ctxt))
-			return
+
 		})
 	}
-}
-
-// using Google or LinkedIn instead
-
-func MiddleWareOAUTH(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		log.Println("middlewareOAUTH is working")
-		if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" || r.URL.Path == "/signup" {
-			next.ServeHTTP(w, r)
-			return
-		}
-		cookie, err := r.Cookie("session_token")
-		if err != nil {
-			log.Printf("Not signed in yet")
-			return
-		}
-		usertoken := cookie.Value
-		log.Println("user is found", usertoken)
-
-		http.Redirect(w, r, "http://localhost:3000/dashboard", http.StatusFound)
-	})
 }
