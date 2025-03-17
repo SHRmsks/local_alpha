@@ -1,6 +1,16 @@
 import Image from 'next/image'
+import BackArrowIcon from '../../../public/assets/backArrow.svg'
+import Pic from '../../../public/assets/pic.svg'
+import CompaniesIcon from '../../../public/assets/companies.svg'
+import NetworkIcon from '../../../public/assets/network.svg'
+import SubscriptionIcon from '../../../public/assets/subscription.svg'
+import PostsIcon from '../../../public/assets/posts.svg'
+import BuyIcon from '../../../public/assets/buy.svg'
+import MessagesIcon from '../../../public/assets/messages.svg'
+import PenIcon from '../../../public/assets/pen.svg'
+import SettingsIcon from '../../../public/assets/settings.svg'
+import ContactIcon from '../../../public/assets/contact.svg'
 import { useState } from 'react'
-
 // Ignoring the fact that the image name and location need props for initial design
 // Also ignoring that everything is secretly a link
 export default function Sidebar() {
@@ -10,17 +20,16 @@ export default function Sidebar() {
       <>
         <div className={`flex flex-col space-y-5 ${isCollapsed ? "invisible w-0" : "visible min-w-[160px]" }`}>
           <div className="bg-[#FFFEFA] flex flex-col items-center gap-2 rounded-lg shadow-md pt-5 pb-4 px-4">
-              <button onClick={() => setIsCollapsed(curr => !curr)} className="ml-auto">
+              <button onClick={() => setIsCollapsed(curr => !curr)} className="ml-auto bg-gray-400 rounded-[25%]">
                 <Image 
-                  src="/assets/backArrow.svg"
+                  src={BackArrowIcon}
                   width={12}
                   height={28}
                   alt="Collapse Sidebar"
-                  className="bg-black"
                 />
               </button>
               <Image
-                src="/assets/pic.svg"
+                src={Pic}
                 width={100}
                 height={100}
                 alt="Profile Picture"
@@ -43,7 +52,7 @@ export default function Sidebar() {
             <p className="font-bold">FOLLOW</p>
             <div className="flex justify-between">
               <Image
-                src="/assets/companies.svg"
+                src={CompaniesIcon}
                 width={20}
                 height={20}
                 alt="Companies Icon"
@@ -55,7 +64,7 @@ export default function Sidebar() {
             </div>
             <div className="flex justify-between">
               <Image
-                src="/assets/network.svg"
+                src={NetworkIcon}
                 width={20}
                 height={20}
                 alt="Network Icon"
@@ -73,7 +82,7 @@ export default function Sidebar() {
           >
             <div className="flex">
               <Image
-                src="/assets/subscription.svg"
+                src={SubscriptionIcon}
                 width={20}
                 height={20}
                 alt="Subscription Icon"
@@ -91,7 +100,7 @@ export default function Sidebar() {
           >
             <div className="flex">
               <Image
-                src="/assets/posts.svg"
+                src={PostsIcon}
                 width={20}
                 height={20}
                 alt="Posts Icon"
@@ -102,7 +111,7 @@ export default function Sidebar() {
             </div>
             <div className="flex">
               <Image
-                src="/assets/buy.svg"
+                src={BuyIcon}
                 width={20}
                 height={20}
                 alt="Buy Icon"
@@ -113,7 +122,7 @@ export default function Sidebar() {
             </div>
             <div className="flex">
               <Image
-                src="/assets/messages.svg"
+                src={MessagesIcon}
                 width={20}
                 height={20}
                 alt="Messages Icon"
@@ -124,7 +133,7 @@ export default function Sidebar() {
             </div>
             <div className="flex">
               <Image
-                src="/assets/pen.svg"
+                src={PenIcon}
                 width={20}
                 height={20}
                 alt="Create Icon"
@@ -141,7 +150,7 @@ export default function Sidebar() {
           >
             <div className="flex">
               <Image
-                src="/assets/settings.svg"
+                src={SettingsIcon}
                 width={20}
                 height={20}
                 alt="Settings Icon"
@@ -152,7 +161,7 @@ export default function Sidebar() {
             </div>
             <div className="flex">
               <Image
-                src="/assets/contact.svg"
+                src={ContactIcon}
                 width={20}
                 height={20}
                 alt="Contact Icon"
@@ -169,10 +178,10 @@ export default function Sidebar() {
             </a>
           </div>
         </div>
-        <div className={`mr-auto mt-10 ${isCollapsed ? "visible" : "invisible w-0" }`}>
+        <div className={`${isCollapsed ? "visible mr-auto mt-10 " : "invisible w-0 h-0" }`}>
           <button onClick={() => setIsCollapsed(curr => !curr)} className="absolute left-0 lg:w-[124px] md:w-[100px] w-[75px] bg-[#FFFEFA] p-3 rounded-r-[8px] shadow-md">
             <Image
-              src="/assets/pic.svg"
+              src={Pic}
               width={100}
               height={100}
               alt="Profile Picture"
