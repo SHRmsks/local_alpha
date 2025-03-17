@@ -8,6 +8,7 @@ import logo from "@/../public/assets/login-page-logo.svg";
 import logoGoogle from "@/../public/assets/logo-google.svg";
 import logoLinkedin from "@/../public/assets/logo-linkedin.svg";
 import { useGoogleLogin } from "@react-oauth/google";
+import Blobs from "@/components/blobs/blobs";
 //import { v4 as uuidv4 } from "uuid";
 
 export default function Login() {
@@ -67,7 +68,8 @@ export default function Login() {
 
     return (
         <div className="bg-iper-white w-full h-screen flex flex-col justify-center items-center">
-            <div className="bg-white rounded-[40px] p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit shadow-md flex flex-col justify-center items-center gap-4 lg:gap-6">
+            <Blobs />
+            <div className="z-10 bg-white rounded-[40px] p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit shadow-md flex flex-col justify-center items-center gap-4 lg:gap-6">
                 <Image
                     src={logo}
                     alt="Iper Logo"
