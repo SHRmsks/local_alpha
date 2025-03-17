@@ -15,7 +15,7 @@ export default function PersonalProf() {
     return (
         <div className="flex flex-col xl:w-[70%] lg:w-[75%] w-[80%] gap-6">
             {/* Background Image works if the image is already cropped which I will assume it is*/}
-            <div className="rounded-3xl shadow-md bg-no-repeat bg-top bg-[#FFFEFA] p-6" style={{ backgroundImage: `url('${LargeProfile.src}')`, backgroundSize: "100% 120px" }}>
+            <div className="rounded-3xl shadow-md bg-no-repeat bg-top bg-[#FFFEFA] p-6" style={{ backgroundImage: `url('${LargeProfile.src}')`, backgroundSize: "auto 120px" }}>
                 <div className="flex justify-between">
                     <div className="flex flex-col mt-8 gap-2">
                         <div className="flex">
