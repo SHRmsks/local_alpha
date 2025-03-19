@@ -48,7 +48,6 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("login handler is called")
 	ctxt := context.Background()
 	frontendURL := r.Context().Value("FrontendURL").(string)
-	log.Println("frontendURL", frontendURL)
 	// var dbCollection *mongo.Collection = h.MongoDB.Collection("loginInfo")
 	var sqltable *pgxpool.Pool = h.PsqlPool
 	// var session mongo.Session = *h.MongoSession
@@ -71,10 +70,7 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err1 != nil {
 		if err1 == pgx.ErrNoRows {
 			log.Println("user is not found")
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-w.Header().Set("Access-Control-Allow-Credentials", "true")
-			http.Redirect(w, r, fmt.Sprint(frontendURL+"/signup"), http.StatusSeeOther)
-
+			http.Redirect(w, r, fmt.Sprint(frontendURL+"signup"), http.StatusBadRequest)
 			return
 		}
 		http.Error(w, "Database Error", http.StatusInternalServerError)

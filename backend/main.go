@@ -209,15 +209,13 @@ func main() {
 	r.Group(func(publicURL chi.Router) {
 		publicURL.Use(cors.Handler(
 			cors.Options{
-				AllowedOrigins:   []string{"http://localhost:3000", "https://www.iperuranium.com"}, // alllow any public urls
+				AllowedOrigins:   []string{"*"}, // alllow any public urls
 				AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 				AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 				AllowCredentials: true,
 				MaxAge:           300,
 			},
 		))
-		publicURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
-			publicURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})
 	})
 
 	r.Group(
@@ -232,10 +230,11 @@ func main() {
 				},
 			),
 			)
-			privateURL.Use(Api.AuthenticateProtector(/*"https://www.iperuranium.com"*/ "http://localhost:3000"))
+			privateURL.Use(Api.AuthenticateProtector("https://www.iperuranium.com"))
 
 			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
-			
+			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
+			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/logcallback", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/linkedin/callback", func(w http.ResponseWriter, r *http.Request) {})
 
