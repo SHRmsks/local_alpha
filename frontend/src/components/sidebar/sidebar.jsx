@@ -13,7 +13,7 @@ import ContactIcon from "../../../public/assets/contact.svg";
 import { useState, useEffect } from "react";
 // Ignoring the fact that the image name and location need props for initial design
 // Also ignoring that everything is secretly a link
-export default function Sidebar() {
+export default function Sidebar({id}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [userName, setUserName] = useState("");
   useEffect(() => {
