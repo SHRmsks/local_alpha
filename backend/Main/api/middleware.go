@@ -19,6 +19,11 @@ type MongoDBcontext struct {
 func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodOptions {
+                next.ServeHTTP(w, r)
+                return
+            }
+
 			ctxt := context.WithValue(r.Context(), "FrontendURL", frontendURL)
 			log.Println("frontendURL", frontendURL)
 			if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" || r.URL.Path == "/signup" {
@@ -26,7 +31,7 @@ func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
 				return
 			}
 			log.Println("authenticateProtector is verifying")
-			cookie, err := r.Cookie("session_token")
+			cookie, err := r.Cookie("session_token") 
 			if err != nil || cookie.Value == "" {
 
 				log.Printf("Session_ token missed, Not signed in yet")
@@ -35,7 +40,7 @@ func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
 					json.NewEncoder(w).Encode(map[string]string{"error": "Unauthorized"})
 					return
 				}
-				http.Redirect(w, r, fmt.Sprintln(frontendURL+"/login"), http.StatusBadRequest)
+				http.Redirect(w, r, fmt.Sprint(frontendURL+"/login"), http.StatusSeeOther)
 				return
 			}
 			usertoken := cookie.Value
