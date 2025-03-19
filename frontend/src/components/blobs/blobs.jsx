@@ -1,28 +1,35 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect } from "react";
 
-export default function CustomPathMotion() {
+export default function Blobs() {
     return (
         <motion.div
             animate={{
                 x: [
-                    -800, -500, -200, 0, 200, 500, 800, 650, 800, 500, 200, 0,
-                    -200, -500, -800, -650, -800, -700, -800,
+                    -800, -650, -500, -300, -200, -100, 0, 100, 200, 350, 500,
+                    650, 800, 750, 650, 500, 300, 200, 100, 0, -100, -200, -350,
+                    -500, -650, -800,
                 ],
                 y: [
-                    600, 550, 500, 400, 500, 450, 200, 0, -400, -600, -550,
-                    -500, -400, -500, -450, -200, 0, 400, 600,
+                    600, 500, 400, 300, 350, 400, 450, 500, 450, 300, 200, 50,
+                    0, -100, -200, -350, -450, -500, -400, -300, -350, -400,
+                    -450, -300, 0, 600,
                 ],
                 borderRadius: [
                     "100% 100% 100% 100% / 100% 100% 100% 100%",
-                    "30% 70% 70% 30% / 30% 30% 70% 70%",
+                    "70% 30% 30% 70% / 60% 40% 60% 40%",
+                    "40% 60% 70% 30% / 40% 70% 30% 60%",
+                    "30% 70% 40% 60% / 70% 30% 50% 50%",
                     "60% 40% 30% 70% / 60% 30% 70% 40%",
-                    "30% 60% 70% 40% / 50% 60% 30% 60%",
-                    "60% 40% 30% 70% / 60% 30% 70% 40%",
-                    "30% 70% 70% 30% / 30% 30% 70% 70%",
+                    "50% 50% 50% 50% / 20% 80% 20% 80%",
+                    "25% 75% 50% 50% / 60% 40% 60% 40%",
+                    "80% 20% 50% 50% / 40% 60% 40% 60%",
+                    "50% 50% 30% 70% / 70% 30% 70% 30%",
                 ],
-                width: [250, 600],
-                height: [600, 250],
+                width: [250, 320, 450, 600, 520, 380, 250],
+                height: [600, 520, 430, 350, 250, 380, 600],
+                scale: [1, 1.05, 1.1, 1.05, 1, 0.95, 0.9, 0.95, 1],
+                rotate: [0, 5, 0, -5, 0],
             }}
             transition={{
                 default: {
@@ -32,22 +39,34 @@ export default function CustomPathMotion() {
                     repeatType: "mirror",
                 },
                 borderRadius: {
-                    duration: 10,
+                    duration: 12,
                     repeat: Infinity,
                     ease: "easeInOut",
                     repeatType: "mirror",
                 },
                 x: {
-                    duration: 50,
+                    duration: 60,
                     repeat: Infinity,
                     ease: "linear",
                     repeatType: "loop",
                 },
                 y: {
-                    duration: 50,
+                    duration: 60,
                     repeat: Infinity,
                     ease: "linear",
                     repeatType: "loop",
+                },
+                scale: {
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    repeatType: "mirror",
+                },
+                rotate: {
+                    duration: 14,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    repeatType: "mirror",
                 },
             }}
             className="absolute bg-iper-gold opacity-50"
