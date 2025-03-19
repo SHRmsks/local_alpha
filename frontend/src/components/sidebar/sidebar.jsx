@@ -10,10 +10,10 @@ import MessagesIcon from "../../../public/assets/messages.svg";
 import PenIcon from "../../../public/assets/pen.svg";
 import SettingsIcon from "../../../public/assets/settings.svg";
 import ContactIcon from "../../../public/assets/contact.svg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // Ignoring the fact that the image name and location need props for initial design
 // Also ignoring that everything is secretly a link
-export default function Sidebar() {
+export default function Sidebar({id}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [userName, setUserName] = useState("");
   useEffect(() => {
