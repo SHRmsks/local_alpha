@@ -12,8 +12,8 @@ function Blob({ xValue, yValue, className }) {
                 "60% 40% 30% 70% / 60% 30% 70% 40%",
                 "30% 70% 70% 30% / 30% 30% 70% 70%",
             ],
-            width: [250, 600],
-            height: [600, 250],
+            width: [300, 700],
+            height: [700, 300],
             x: xValue,
             y: yValue,
         },
@@ -57,7 +57,7 @@ function Blob({ xValue, yValue, className }) {
 
 export default function Blobs() {
     return (
-        <div>
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
             <Blob
                 xValue={[
                     "-55vw",
@@ -146,8 +146,9 @@ export default function Blobs() {
                     "-37vh",
                     "-51vh",
                 ]}
-                className={"bg-iper-blue"}
+                className={"bg-iper-blue opacity-40"}
             />
+            <Blob className={"bg-blue-200"} />
         </div>
     );
 }
