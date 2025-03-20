@@ -9,7 +9,6 @@ import logoGoogle from "@/../public/assets/logo-google.svg";
 import logoLinkedin from "@/../public/assets/logo-linkedin.svg";
 import { useGoogleLogin } from "@react-oauth/google";
 import Blobs from "@/components/blobs/blobs";
-import AnimatedBlob from "@/components/blobs/animatedblob";
 //import { v4 as uuidv4 } from "uuid";
 
 export default function Login() {
