@@ -19,6 +19,12 @@ type MongoDBcontext struct {
 func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			// if r.Method == http.MethodOptions {
+			// 	next.ServeHTTP(w, r)
+			// 	return
+			// }
+
 			ctxt := context.WithValue(r.Context(), "FrontendURL", frontendURL)
 			log.Println("frontendURL", frontendURL)
 			if r.URL.Path == "/callback" || r.URL.Path == "/linkedin/callback" || r.URL.Path == "/login" || r.URL.Path == "/signup" {

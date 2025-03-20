@@ -107,7 +107,7 @@ func main() {
 	port := os.Getenv("PORT") // backend port
 
 	frontEND_PORT := os.Getenv("FRONTEND_PORT")
-	log.Println("frontend port: ", frontEND_PORT)
+	// log.Println("frontend port: ", frontEND_PORT)
 	domainName := os.Getenv("DomainName")
 	// go rountine to initilize the database
 	/*all the credentials we needed */
@@ -125,7 +125,7 @@ func main() {
 
 	/*backend Server*/
 	server := &http.Server{
-		Addr:    port,
+		Addr:    ":" + port,
 		Handler: r,
 	}
 	var mongoClient *mongo.Client
@@ -205,11 +205,12 @@ func main() {
 
 	// middleWare
 	r.Use(middleware.Logger)
+
 	// Cors set up
 	r.Group(func(publicURL chi.Router) {
 		publicURL.Use(cors.Handler(
 			cors.Options{
-				AllowedOrigins:   []string{"*"}, // alllow any public urls
+				AllowedOrigins:   []string{"http://*", "https://*"}, // alllow any public urls
 				AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 				AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 				AllowCredentials: true,
@@ -222,15 +223,15 @@ func main() {
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), "https://www.iperuranium.com", fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)}, // alllow any public url
+					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)},
 					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
+					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization", "X-CSRF-Token"},
 					AllowCredentials: true,
 					MaxAge:           300,
 				},
 			),
 			)
-			privateURL.Use(Api.AuthenticateProtector("https://www.iperuranium.com"))
+			privateURL.Use(Api.AuthenticateProtector("http://localhost:3000"))
 
 			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})

@@ -33,7 +33,7 @@ export default function Login() {
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
+  const [wrongpassword, setWrongpassword] = useState(false);
   const submitHandler = () => {
     const jsonfiedLoginVal = JSON.stringify({
       userName: emailValue.toString().trim(),
@@ -49,22 +49,27 @@ export default function Login() {
     })
       .then((res) => {
         if (!res.ok) {
+          if (res.status === 400){
+            router.push("/signup")
+            return
+          }
           throw new Error("Network Lost");
         }
         return res.json();
       })
       .then((json) => {
-        if (json.message === "Login Successful") {
+        if (json.message === "successful") {
           const uuid = json.uuid;
           console.log("uuid1", uuid);
           router.push(`/dashboard?session=${uuid}`);
         }
+       setWrongpassword(true)
       })
       .catch((err) => {
         throw new Error("error: ", err);
       });
   };
-
+  console.log("wrong pasword", wrongpassword)
   return (
     <div className="bg-iper-white w-full h-screen flex flex-col justify-center items-center">
       <div className="bg-white rounded-[40px] p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit shadow-md flex flex-col justify-center items-center gap-4 lg:gap-6">
