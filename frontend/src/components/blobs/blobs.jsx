@@ -5,28 +5,30 @@ function Blob({ xValue, yValue, className }) {
     const variants = {
         animate: {
             borderRadius: [
-                "100% 100% 100% 100% / 100% 100% 100% 100%",
-                "30% 70% 70% 30% / 30% 30% 70% 70%",
-                "60% 40% 30% 70% / 60% 30% 70% 40%",
-                "30% 60% 70% 40% / 50% 60% 30% 60%",
-                "60% 40% 30% 70% / 60% 30% 70% 40%",
-                "30% 70% 70% 30% / 30% 30% 70% 70%",
+                "42% 58% 63% 37% / 45% 52% 48% 55%",
+                "67% 33% 52% 48% / 36% 65% 35% 64%",
+                "55% 45% 40% 60% / 70% 30% 65% 35%",
+                "28% 72% 65% 35% / 42% 58% 38% 62%",
+                "45% 55% 70% 30% / 55% 45% 60% 40%",
+                "33% 67% 58% 42% / 63% 37% 42% 58%",
+                "50% 50% 34% 66% / 37% 63% 70% 30%",
+                "42% 58% 63% 37% / 45% 52% 48% 55%",
             ],
-            width: [300, 700],
-            height: [700, 300],
+            width: [300, 500, 450, 600, 350, 700, 400, 300],
+            height: [700, 400, 550, 350, 600, 300, 500, 700],
             x: xValue,
             y: yValue,
         },
     };
     const transition = {
         default: {
-            duration: 10,
+            duration: 80,
             repeat: Infinity,
             ease: "easeInOut",
             repeatType: "mirror",
         },
         borderRadius: {
-            duration: 10,
+            duration: 80,
             repeat: Infinity,
             ease: "easeInOut",
             repeatType: "mirror",
@@ -59,18 +61,160 @@ export default function Blobs() {
     return (
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
             <Blob
-                xValue={["25vw"]}
-                yValue={["75vh"]}
+                xValue={[
+                    "25vw",
+                    "40vw",
+                    "55vw",
+                    "70vw", // UP
+                    "85vw", // UP
+                    "90vw", // UP
+                    "85vw", // UP
+                    "70vw", // UP
+                    "55vw",
+                    "40vw",
+                    "25vw",
+                    "17.5vw",
+                    "10vw", // Down
+                    "-5vw", // Down
+                    "-10vw", // Down
+                    "-5vw", // Down
+                    "10vw", // Down
+                    "17.5vw",
+                    "25vw",
+                ]}
+                yValue={[
+                    "75vh",
+                    "70vh",
+                    "75vh",
+                    "55vh", // UP
+                    "40vh", // UP
+                    "25vh", // UP
+                    "10vh", // UP
+                    "-5vh", // UP
+                    "-10vh",
+                    "-5vh",
+                    "-10vh",
+                    "0vh",
+                    "10vh", // Down
+                    "25vh", // Down
+                    "40vh", // Down
+                    "55vh", // Down
+                    "65vh", // Down
+                    "70vh",
+                    "75vh",
+                ]}
                 className={"bg-iper-gold"}
             />
             <Blob
-                xValue={["90vw"]}
-                yValue={["10vh"]}
+                xValue={[
+                    "90vw", // UP
+                    "85vw", // UP
+                    "70vw",
+                    "55vw",
+                    "40vw",
+                    "25vw",
+                    "10vw",
+                    "5vw", // Down
+                    "-10vw", // Down
+                    "05vw", // Down
+                    "-10vw", // Down
+                    "-5vw", // Down
+                    "-10vw", // Down
+                    "-5vw", // Down
+                    "10vw",
+                    "25vw",
+                    "40vw",
+                    "55vw",
+                    "70vw",
+                    "85vw", // UP
+                    "90vw", // UP
+                    "85vw",
+                    "90vw",
+                    "90vw",
+                ]}
+                yValue={[
+                    "10vh",
+                    "-5vh",
+                    "0vh",
+                    "-5vh",
+                    "-10vh",
+                    "-5vh",
+                    "-10vh",
+                    "-5vh", // Down
+                    "-10vh", // Down
+                    "5vh", // Down
+                    "20vh", // Down
+                    "35vh", // Down
+                    "50vh", // Down
+                    "75vh", // Down
+                    "80vh",
+                    "85vh",
+                    "90vh",
+                    "80vh",
+                    "70vh",
+                    "60vh",
+                    "50vh",
+                    "40vh",
+                    "30vh",
+                    "10vh",
+                ]}
                 className={"bg-iper-blue opacity-40"}
             />
             <Blob
-                xValue={["10vw"]}
-                yValue={["-10vh"]}
+                xValue={[
+                    "10vw",
+                    "25vw",
+                    "40vw",
+                    "55vw",
+                    "70vw",
+                    "80vw",
+                    "90vw", // Down
+                    "85vw", // Down
+                    "90vw", // Down
+                    "85vw", // Down
+                    "90vw", // Down
+                    "85vw", // Down
+                    "70vw",
+                    "55vw",
+                    "40vw",
+                    "25vw",
+                    "10vw",
+                    "5vw", // Down
+                    "-10vw", // Down
+                    "05vw", // Down
+                    "-10vw", // Down
+                    "-5vw", // Down
+                    "-10vw", // Down
+                    "-5vw", // Down
+                    "10vw",
+                ]}
+                yValue={[
+                    "-10vh",
+                    "-5vh",
+                    "0vh",
+                    "-5vh",
+                    "0vh",
+                    "5vh",
+                    "20vh", // Down
+                    "35vh", // Down
+                    "50vh", // Down
+                    "65vh", // Down
+                    "80vh", // Down
+                    "90vh", // Down
+                    "85vh",
+                    "80vh",
+                    "85vh",
+                    "80vh",
+                    "85vh",
+                    "75vh", // UP
+                    "60vh", // UP
+                    "45vh", // UP
+                    "30vh", // UP
+                    "15vh", // UP
+                    "0vh", // UP
+                    "-5vh", // UP
+                    "-10vh",
+                ]}
                 className={"bg-blue-200"}
             />
         </div>
