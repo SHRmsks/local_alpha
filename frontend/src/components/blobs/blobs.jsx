@@ -59,96 +59,20 @@ export default function Blobs() {
     return (
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
             <Blob
-                xValue={[
-                    "-55vw",
-                    "-42vw",
-                    "-26vw",
-                    "-10vw",
-                    "0vw",
-                    "10vw",
-                    "26vw",
-                    "42vw",
-                    "34vw",
-                    "26vw",
-                    "10vw",
-                    "0vw",
-                    "-10vw",
-                    "-26vw",
-                    "-32vw",
-                    "-46vw",
-                    "-55vw",
-                    "-48vw",
-                    "-55vw",
-                ]}
-                yValue={[
-                    "60vh",
-                    "56vh",
-                    "51vh",
-                    "46vh",
-                    "37vh",
-                    "46vh",
-                    "42vh",
-                    "19vh",
-                    "0vh",
-                    "-37vh",
-                    "-51vh",
-                    "-46vh",
-                    "-37vh",
-                    "-46vh",
-                    "-42vh",
-                    "-19vh",
-                    "0vh",
-                    "37vh",
-                    "60vh",
-                ]}
+                xValue={["25vw"]}
+                yValue={["75vh"]}
                 className={"bg-iper-gold"}
             />
             <Blob
-                xValue={[
-                    "10vw",
-                    "0vw",
-                    "-10vw",
-                    "-26vw",
-                    "-32vw",
-                    "-46vw",
-                    "-55vw",
-                    "-48vw",
-                    "-55vw",
-                    "-42vw",
-                    "-26vw",
-                    "-10vw",
-                    "0vw",
-                    "10vw",
-                    "26vw",
-                    "42vw",
-                    "34vw",
-                    "26vw",
-                    "10vw",
-                ]}
-                yValue={[
-                    "-51vh",
-                    "-46vh",
-                    "-37vh",
-                    "-46vh",
-                    "-42vh",
-                    "-19vh",
-                    "0vh",
-                    "37vh",
-                    "60vh",
-                    "56vh",
-                    "51vh",
-                    "46vh",
-                    "37vh",
-                    "46vh",
-                    "42vh",
-                    "19vh",
-                    "0vh",
-                    "-37vh",
-                    "-51vh",
-                ]}
+                xValue={["90vw"]}
+                yValue={["10vh"]}
                 className={"bg-iper-blue opacity-40"}
             />
-            <Blob className={"bg-blue-200"} />
+            <Blob
+                xValue={["10vw"]}
+                yValue={["-10vh"]}
+                className={"bg-blue-200"}
+            />
         </div>
     );
 }
