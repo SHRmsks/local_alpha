@@ -217,6 +217,156 @@ export default function Blobs() {
                 ]}
                 className={"bg-blue-200"}
             />
+            <Blob
+                xValue={[
+                    "-5vw",
+                    "-10vw", // Down
+                    "-5vw", // Down
+                    "-10vw",
+                    "-5vw",
+                    "-10vw",
+                    "-5vw",
+                    "0vw",
+                    "5vw",
+                    "10vw",
+                    "20vw",
+                    "30vw",
+                    "40vw",
+                    "50vw",
+                    "60vw",
+                    "70vw",
+                    "80vw",
+                    "90vw", // Down
+                    "85vw", // Down
+                    "90vw", // Down
+                    "85vw", // Down
+                    "90vw", // Down
+                    "85vw", // Down
+                    "70vw",
+                    "60vw",
+                    "50vw",
+                    "40vw",
+                    "30vw",
+                    "20vw",
+                    "10vw",
+                    "5vw", // Down
+                    "-10vw", // Down
+                    "05vw", // Down
+                    "-10vw", // Down
+                    "-5vw", // Down
+                ]}
+                yValue={[
+                    "45vh", // UP
+                    "35vh", // UP
+                    "25vh", // UP
+                    "15vh",
+                    "5vh",
+                    "0vh", // UP
+                    "-5vh", // UP
+                    "-10vh",
+                    "-5vh",
+                    "-10vh",
+                    "-5vh",
+                    "0vh",
+                    "-5vh",
+                    "0vh",
+                    "-5vh",
+                    "0vh",
+                    "5vh",
+                    "0vh",
+                    "5vh",
+                    "20vh", // Down
+                    "35vh", // Down
+                    "50vh",
+                    "65vh", // Down
+                    "80vh", // Down
+                    "90vh", // Down
+                    "85vh",
+                    "80vh",
+                    "85vh",
+                    "80vh",
+                    "85vh",
+                    "80vh",
+                    "85vh",
+                    "75vh", // UP
+                    "60vh", // UP
+                    "45vh",
+                ]}
+                className={"bg-yellow-200"}
+            />
+            <Blob
+                xValue={[
+                    "70vw",
+                    "60vw",
+                    "50vw",
+                    "40vw",
+                    "30vw",
+                    "20vw",
+                    "10vw",
+                    "5vw",
+                    "0vw",
+                    "-5vw",
+                    "-10vw",
+                    "-5vw",
+                    "-10vw",
+                    "-5vw",
+                    "-10vw",
+                    "-10vw",
+                    "-5vw",
+                    "5vw",
+                    "10vw",
+                    "20vw",
+                    "30vw",
+                    "40vw",
+                    "50vw",
+                    "60vw",
+                    "70vw",
+                    "85vw",
+                    "90vw",
+                    "85vw",
+                    "90vw",
+                    "85vw",
+                    "90vw",
+                    "80vw",
+                    "70vw",
+                ]}
+                yValue={[
+                    "60vh", // UP
+                    "75vh", // UP
+                    "85vh",
+                    "80vh",
+                    "85vh",
+                    "80vh",
+                    "85vh",
+                    "80vh",
+                    "85vh",
+                    "90vh", // Down
+                    "80vh", // Down
+                    "65vh", // Down
+                    "50vh",
+                    "35vh", // Down
+                    "20vh", // Down
+                    "5vh",
+                    "0vh",
+                    "5vh",
+                    "0vh",
+                    "-5vh",
+                    "0vh",
+                    "-5vh",
+                    "0vh",
+                    "-5vh",
+                    "-10vh",
+                    "-5vh",
+                    "0vh", // UP
+                    "5vh",
+                    "15vh",
+                    "25vh", // UP
+                    "35vh", // UP
+                    "45vh", // UP
+                    "60vh",
+                ]}
+                className={"bg-gray-300"}
+            />
         </div>
     );
 }
