@@ -1,4 +1,9 @@
+import { useState, useEffect } from "react"
 export default function Blobs() {
+  const [delay, setDelay] = useState(0);
+  useEffect(() => {
+    setDelay(-Math.random()*40-20);
+  }, []);
   return (
     <svg
       preserveAspectRatio="xMidYMid slice"
@@ -35,7 +40,7 @@ export default function Blobs() {
                     transform: translate(0, 30px) scale(0.6);
                 }
                 50% {
-                    transform: translate(0, -30px) scale(1.4);
+                    transform: translate(0, -30px) scale(1.2);
                 }
                 100% {
                     transform: translate(0, 30px) scale(0.6);
@@ -43,42 +48,49 @@ export default function Blobs() {
             }
             @keyframes rotate4 {
                 0% {
-                    transform: translate(0, 0px) scale(1);
+                    transform: translate(0, 0px) scale(1.2);
                 }
                 50% {
-                    transform: translate(30px, 30px) scale(1.2);
+                    transform: translate(30px, 30px) scale(1.4);
                 }
                 100% {
-                    transform: translate(0, 0px) scale(1);
+                    transform: translate(0, 0px) scale(1.2);
                 }
             }
             .blob1 {
                 animation: rotate 80s linear infinite;
                 transform-origin: 1359px 0px;
+                animation-delay: `+delay+`s;
             }
             .circle1 {
                 animation: rotate3 30s linear infinite;
                 transform-origin: 1400px 618px;
+                animation-delay: `+delay+`s;
             }
             .circle2 {
                 animation: rotate3 24s linear infinite;
                 transform-origin: -2.5px 264px;
+                animation-delay: `+delay+`s;
             }
             .blob2 {
                 animation: rotate2 100s linear infinite;
                 transform-origin: 80px 896px;
+                animation-delay: `+delay+`s;
             }
             .circle3 {
                 animation: rotate3 40s linear infinite;
                 transform-origin: 1425px 137px;
+                animation-delay: `+delay+`s;
             }
             .line {
                 animation: rotate4 30s linear infinite;
                 transform-origin: 1613px 700px;
+                animation-delay: `+delay+`s;
             }
             .circle4 {
                 animation: rotate4 20s linear infinite;
                 transform-origin: -11px -145px;
+                animation-delay: `+delay+`s;
             }
                 `}
         </style>
@@ -105,7 +117,7 @@ export default function Blobs() {
         d="M 69.335336,1277.2057 c 161.803424,0 292.971994,-152.971 292.971994,-341.69537 0,-188.71223 -131.16857,-341.6954 -292.971994,-341.6954 -161.803426,0 -292.972006,152.98317 -292.972006,341.6954 0,188.72437 131.16858,341.69537 292.972006,341.69537 z"
       />
       <path
-        fill="#385CA5"
+        fill="#9BD3E4"
         className="circle1"
         d="M 1399.72,664.545 c 26.27,0 47.57,-20.999 47.57,-46.903 0,-25.904 -21.3,-46.904 -47.57,-46.904 -26.27,0 -47.57,21 -47.57,46.904 0,25.904 21.3,46.903 47.57,46.903 z"
       />
