@@ -9,8 +9,6 @@ import Dropdown from '../../../public/assets/dropdown.svg'
 import Occupation from '../occupation/occupation'
 import Education from '../education/education'
 
-console.log(LargeProfile)
-
 export default function PersonalProf() {
     return (
         <div className="flex flex-col xl:w-[70%] lg:w-[75%] w-[80%] gap-6">
