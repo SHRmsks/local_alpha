@@ -43,9 +43,10 @@ type AuroraSecret struct {
 func getAuroraCredentials(secretName, region string) (*AuroraSecret, error) {
 	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	cfg, err := awsConfig.LoadDefaultConfig(context.TODO(), awsConfig.WithRegion(region), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")))
+	ctxt := context.Background()
+	cfg, err := awsConfig.LoadDefaultConfig(ctxt, awsConfig.WithRegion(region), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")))
 	if err != nil {
-		log.Fatal("error on loading Aurora", err)
+		log.Fatal("error on loading Aurora config ", err)
 	}
 	log.Printf("AWS config loaded successfully for region: %s", region)
 
@@ -54,8 +55,8 @@ func getAuroraCredentials(secretName, region string) (*AuroraSecret, error) {
 		SecretId:     aws.String(secretName),
 		VersionStage: aws.String("AWSCURRENT"),
 	}
-	log.Printf("Attempting to retrieve secret %s in region %s", secretName, region)
-	result, err := smClient.GetSecretValue(context.TODO(), input)
+
+	result, err := smClient.GetSecretValue(ctxt, input)
 	if err != nil {
 		log.Printf("failed to retrieve secret %s in region %s: %v", secretName, region, err)
 		return nil, fmt.Errorf("failed to retrieve secret: %w", err)
@@ -104,10 +105,11 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	log.Println("Environment variables loaded successfully")
+
 	port := os.Getenv("PORT") // backend port
 
 	frontEND_PORT := os.Getenv("FRONTEND_PORT")
-	log.Println("frontend port: ", frontEND_PORT)
+	// log.Println("frontend port: ", frontEND_PORT)
 	domainName := os.Getenv("DomainName")
 	// go rountine to initilize the database
 	/*all the credentials we needed */
@@ -125,7 +127,7 @@ func main() {
 
 	/*backend Server*/
 	server := &http.Server{
-		Addr:    port,
+		Addr:    ":" + port,
 		Handler: r,
 	}
 	var mongoClient *mongo.Client
@@ -205,11 +207,12 @@ func main() {
 
 	// middleWare
 	r.Use(middleware.Logger)
+
 	// Cors set up
 	r.Group(func(publicURL chi.Router) {
 		publicURL.Use(cors.Handler(
 			cors.Options{
-				AllowedOrigins:   []string{"*"}, // alllow any public urls
+				AllowedOrigins:   []string{"http://*", "https://*"}, // alllow any public urls
 				AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 				AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 				AllowCredentials: true,
@@ -222,16 +225,16 @@ func main() {
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), "https://www.iperuranium.com", fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)}, // alllow any public url
+					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)},
 					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
+					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization", "X-CSRF-Token"},
 					AllowCredentials: true,
 					MaxAge:           300,
 				},
 			),
 			)
-			privateURL.Use(Api.AuthenticateProtector("https://www.iperuranium.com"))
-
+			privateURL.Use(Api.AuthenticateProtector(fmt.Sprintf("https://%v.com", domainName)))
+			// privateURL.Use(Api.AuthenticateProtector("http://localhost:3000"))
 			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})

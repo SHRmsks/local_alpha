@@ -45,9 +45,10 @@ func LoginInfo(mongoDB *mongo.Database, psqlDB *pgxpool.Pool, session *mongo.Ses
 }
 
 func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	// frontendURL := r.Context().Value("FrontendURL").(string)
 	log.Println("login handler is called")
 	ctxt := context.Background()
-	frontendURL := r.Context().Value("FrontendURL").(string)
+
 	// var dbCollection *mongo.Collection = h.MongoDB.Collection("loginInfo")
 	var sqltable *pgxpool.Pool = h.PsqlPool
 	// var session mongo.Session = *h.MongoSession
@@ -70,7 +71,11 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err1 != nil {
 		if err1 == pgx.ErrNoRows {
 			log.Println("user is not found")
-			http.Redirect(w, r, fmt.Sprint(frontendURL+"signup"), http.StatusBadRequest)
+			// log.Println("fwf", fmt.Sprint(frontendURL+"/signup"))
+
+			http.Error(w, "user not found", http.StatusBadRequest)
+			// http.Redirect(w, r, fmt.Sprintf(frontendURL+"/login"), http.StatusSeeOther)
+
 			return
 		}
 		http.Error(w, "Database Error", http.StatusInternalServerError)
@@ -78,7 +83,11 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err3 := bcrypt.CompareHashAndPassword(psswrd, []byte(password))
 	if err3 != nil {
-		http.Error(w, "Wrong Password", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "unsuccessful",
+		})
 		return
 	}
 
@@ -96,7 +105,7 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Login Successful",
+		"message": "successful",
 		"uuid":    UserID.String(),
 	})
 
