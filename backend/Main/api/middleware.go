@@ -41,7 +41,7 @@ func AuthenticateProtector(frontendURL string) func(http.Handler) http.Handler {
 					json.NewEncoder(w).Encode(map[string]string{"error": "Unauthorized"})
 					return
 				}
-				http.Redirect(w, r, fmt.Sprintln(frontendURL+"/login"), http.StatusBadRequest)
+				http.Redirect(w, r, fmt.Sprintf(frontendURL+"/login"), http.StatusSeeOther)
 				return
 			}
 			usertoken := cookie.Value

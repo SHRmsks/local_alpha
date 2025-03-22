@@ -43,9 +43,10 @@ type AuroraSecret struct {
 func getAuroraCredentials(secretName, region string) (*AuroraSecret, error) {
 	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	cfg, err := awsConfig.LoadDefaultConfig(context.TODO(), awsConfig.WithRegion(region), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")))
+	ctxt := context.Background()
+	cfg, err := awsConfig.LoadDefaultConfig(ctxt, awsConfig.WithRegion(region), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")))
 	if err != nil {
-		log.Fatal("error on loading Aurora", err)
+		log.Fatal("error on loading Aurora config ", err)
 	}
 	log.Printf("AWS config loaded successfully for region: %s", region)
 
@@ -54,8 +55,8 @@ func getAuroraCredentials(secretName, region string) (*AuroraSecret, error) {
 		SecretId:     aws.String(secretName),
 		VersionStage: aws.String("AWSCURRENT"),
 	}
-	log.Printf("Attempting to retrieve secret %s in region %s", secretName, region)
-	result, err := smClient.GetSecretValue(context.TODO(), input)
+
+	result, err := smClient.GetSecretValue(ctxt, input)
 	if err != nil {
 		log.Printf("failed to retrieve secret %s in region %s: %v", secretName, region, err)
 		return nil, fmt.Errorf("failed to retrieve secret: %w", err)
@@ -104,6 +105,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	log.Println("Environment variables loaded successfully")
+
 	port := os.Getenv("PORT") // backend port
 
 	frontEND_PORT := os.Getenv("FRONTEND_PORT")
@@ -231,8 +233,8 @@ func main() {
 				},
 			),
 			)
-			privateURL.Use(Api.AuthenticateProtector("http://localhost:3000"))
-
+			privateURL.Use(Api.AuthenticateProtector(fmt.Sprintf("https://%v.com", domainName)))
+			// privateURL.Use(Api.AuthenticateProtector("http://localhost:3000"))
 			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})

@@ -45,15 +45,7 @@ func LoginInfo(mongoDB *mongo.Database, psqlDB *pgxpool.Pool, session *mongo.Ses
 }
 
 func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	// w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	// w.Header().Set("Access-Control-Allow-Credentials", "true")
-	// if r.Method == http.MethodOptions {
-	// 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	// 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	// 	w.WriteHeader(http.StatusNoContent)
-	// 	return
-	// }
-
+	// frontendURL := r.Context().Value("FrontendURL").(string)
 	log.Println("login handler is called")
 	ctxt := context.Background()
 
@@ -82,6 +74,7 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 			// log.Println("fwf", fmt.Sprint(frontendURL+"/signup"))
 
 			http.Error(w, "user not found", http.StatusBadRequest)
+			// http.Redirect(w, r, fmt.Sprintf(frontendURL+"/login"), http.StatusSeeOther)
 
 			return
 		}
