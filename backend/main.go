@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"log"
@@ -9,6 +10,13 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -24,6 +32,72 @@ import (
 	graph "iperuranium.com/backend/graph"
 )
 
+type AuroraSecret struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	DBName   string `json:"dbname"`
+}
+
+func getAuroraCredentials(secretName, region string) (*AuroraSecret, error) {
+	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
+	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	ctxt := context.Background()
+	cfg, err := awsConfig.LoadDefaultConfig(ctxt, awsConfig.WithRegion(region), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")))
+	if err != nil {
+		log.Fatal("error on loading Aurora config ", err)
+	}
+	log.Printf("AWS config loaded successfully for region: %s", region)
+
+	smClient := secretsmanager.NewFromConfig(cfg)
+	input := &secretsmanager.GetSecretValueInput{
+		SecretId:     aws.String(secretName),
+		VersionStage: aws.String("AWSCURRENT"),
+	}
+
+	result, err := smClient.GetSecretValue(ctxt, input)
+	if err != nil {
+		log.Printf("failed to retrieve secret %s in region %s: %v", secretName, region, err)
+		return nil, fmt.Errorf("failed to retrieve secret: %w", err)
+	}
+	var secret AuroraSecret
+	err = json.Unmarshal([]byte(*result.SecretString), &secret)
+	if err != nil {
+		log.Printf("failed to unmarshal secret string for secret %s: %v", secretName, err)
+		return nil, fmt.Errorf("failed to unmarshal secret string: %w", err)
+	}
+	log.Printf("Secret %s retrieved and unmarshaled successfully", secretName)
+	return &secret, nil
+}
+
+func connectToAurora(secretName, region string) (*pgxpool.Pool, error) {
+	secret, err := getAuroraCredentials(secretName, region)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build connection string in the PostgreSQL URL format.
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
+		secret.Username,
+		secret.Password,
+		secret.Host,
+		secret.Port,
+		secret.DBName,
+	)
+
+	// Create a connection pool with a timeout context.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pool, err := pgxpool.New(ctx, connStr)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create connection pool: %w", err)
+	}
+
+	return pool, nil
+}
+
 func main() {
 	// load configuration
 	err := godotenv.Load()
@@ -31,15 +105,19 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	log.Println("Environment variables loaded successfully")
+
 	port := os.Getenv("PORT") // backend port
 
 	frontEND_PORT := os.Getenv("FRONTEND_PORT")
-	log.Println("frontend port: ", frontEND_PORT)
+	// log.Println("frontend port: ", frontEND_PORT)
 	domainName := os.Getenv("DomainName")
 	// go rountine to initilize the database
 	/*all the credentials we needed */
+	AuroraSecretName := os.Getenv("ArScrtNm")
+	region := "us-east-1"
+
 	Mongodb := os.Getenv("DBURL")
-	PSQLdb := os.Getenv("PSQLURL")
+
 	googleClientSecret := os.Getenv("googleClientSecret")
 	linkedinClientSecret := os.Getenv("linkedinClientSecret")
 	redisAddr := os.Getenv("redisAddr")
@@ -49,7 +127,7 @@ func main() {
 
 	/*backend Server*/
 	server := &http.Server{
-		Addr:    port,
+		Addr:    ":" + port,
 		Handler: r,
 	}
 	var mongoClient *mongo.Client
@@ -87,9 +165,9 @@ func main() {
 	}()
 	go func() {
 		defer wg.Done()
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		conn, err := pgxpool.New(ctx, fmt.Sprint(PSQLdb+"USER"))
+
+		conn, err := connectToAurora(AuroraSecretName, region)
+
 		if err != nil {
 			log.Fatalf("Error connecting to Postgre: %v", err)
 
@@ -129,11 +207,12 @@ func main() {
 
 	// middleWare
 	r.Use(middleware.Logger)
+
 	// Cors set up
 	r.Group(func(publicURL chi.Router) {
 		publicURL.Use(cors.Handler(
 			cors.Options{
-				AllowedOrigins:   []string{"*"}, // alllow any public urls
+				AllowedOrigins:   []string{"http://*", "https://*"}, // alllow any public urls
 				AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 				AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 				AllowCredentials: true,
@@ -146,16 +225,16 @@ func main() {
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), "https://www.iperuranium.com", fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)}, // alllow any public url
+					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)},
 					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
+					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization", "X-CSRF-Token"},
 					AllowCredentials: true,
 					MaxAge:           300,
 				},
 			),
 			)
-			privateURL.Use(Api.AuthenticateProtector("https://www.iperuranium.com"))
-
+			privateURL.Use(Api.AuthenticateProtector(fmt.Sprintf("https://%v.com", domainName)))
+			// privateURL.Use(Api.AuthenticateProtector("http://localhost:3000"))
 			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})

@@ -45,9 +45,10 @@ func LoginInfo(mongoDB *mongo.Database, psqlDB *pgxpool.Pool, session *mongo.Ses
 }
 
 func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	// frontendURL := r.Context().Value("FrontendURL").(string)
 	log.Println("login handler is called")
 	ctxt := context.Background()
-	frontendURL := r.Context().Value("FrontendURL").(string)
+
 	// var dbCollection *mongo.Collection = h.MongoDB.Collection("loginInfo")
 	var sqltable *pgxpool.Pool = h.PsqlPool
 	// var session mongo.Session = *h.MongoSession
@@ -70,7 +71,11 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if err1 != nil {
 		if err1 == pgx.ErrNoRows {
 			log.Println("user is not found")
-			http.Redirect(w, r, fmt.Sprint(frontendURL+"signup"), http.StatusBadRequest)
+			// log.Println("fwf", fmt.Sprint(frontendURL+"/signup"))
+
+			http.Error(w, "user not found", http.StatusBadRequest)
+			// http.Redirect(w, r, fmt.Sprintf(frontendURL+"/login"), http.StatusSeeOther)
+
 			return
 		}
 		http.Error(w, "Database Error", http.StatusInternalServerError)
@@ -78,7 +83,11 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err3 := bcrypt.CompareHashAndPassword(psswrd, []byte(password))
 	if err3 != nil {
-		http.Error(w, "Wrong Password", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "unsuccessful",
+		})
 		return
 	}
 
@@ -96,7 +105,7 @@ func (h *DBInfo) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Login Successful",
+		"message": "successful",
 		"uuid":    UserID.String(),
 	})
 
@@ -225,7 +234,12 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 		if err1 == pgx.ErrNoRows {
 			log.Println("signing up user right now")
 			uuid1 = uuid.New()
-			_, err2 := psql.Exec(context, "INSERT INTO userinfo (username, password, uuid, email, provider) VALUES ($1,$2,$3,$4,$5)", name, "000000", uuid1, email, 0)
+			psswrd, err3 := bcrypt.GenerateFromPassword([]byte("000000"), 10)
+			if err3 != nil {
+				log.Println("can't create hash salt for user")
+				return
+			}
+			_, err2 := psql.Exec(context, "INSERT INTO userinfo (username, password, uuid, email, provider) VALUES ($1,$2,$3,$4,$5)", name, psswrd, uuid1, email, 0)
 			if err2 != nil {
 				log.Println("Couldn't sign user up through linkedin, err msg: ", err2)
 			}
@@ -311,12 +325,19 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	err1 := psql.QueryRow(context, "SELECT uuid FROM userinfo WHERE email=$1", email).Scan(&uuid1)
 	if err1 != nil {
 		uuid1 = uuid.New()
+		psswrd, err3 := bcrypt.GenerateFromPassword([]byte("000000"), 10)
+		if err3 != nil {
+			log.Println("can't create hash salt for user")
+			return
+		}
 		if err1 == pgx.ErrNoRows {
-			_, err1 := psql.Exec(context, "INSERT INTO userinfo (username, password ,uuid, email, provider) values  ($1, $2, $3, $4, $5)", username, "000000", uuid1, email, 1)
+			_, err1 := psql.Exec(context, "INSERT INTO userinfo (username, psswrd ,uuid, email, provider) values  ($1, $2, $3, $4, $5)", username, psswrd, uuid1, email, 1)
 			if err1 != nil {
 				log.Println("can't sign up with google oauth")
+			} else {
+				log.Println("sign up with user successfully")
 			}
-			log.Println("sign up with user successfully")
+
 		} else {
 			log.Println("Couldn't sign user up through google , err msg: ", err1)
 			return

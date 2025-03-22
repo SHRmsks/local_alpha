@@ -1,21 +1,43 @@
-import Image from 'next/image'
-import BackArrowIcon from '../../../public/assets/backArrow2.svg'
-import Pic from '../../../public/assets/pic.svg'
-import CompaniesIcon from '../../../public/assets/companies.svg'
-import NetworkIcon from '../../../public/assets/network.svg'
-import SubscriptionIcon from '../../../public/assets/subscription.svg'
-import PostsIcon from '../../../public/assets/posts.svg'
-import BuyIcon from '../../../public/assets/buy.svg'
-import MessagesIcon from '../../../public/assets/messages.svg'
-import PenIcon from '../../../public/assets/pen.svg'
-import SettingsIcon from '../../../public/assets/settings.svg'
-import ContactIcon from '../../../public/assets/contact.svg'
-import { useState } from 'react'
+import Image from "next/image";
+import BackArrowIcon from "../../../public/assets/backArrow.svg";
+import Pic from "../../../public/assets/pic.svg";
+import CompaniesIcon from "../../../public/assets/companies.svg";
+import NetworkIcon from "../../../public/assets/network.svg";
+import SubscriptionIcon from "../../../public/assets/subscription.svg";
+import PostsIcon from "../../../public/assets/posts.svg";
+import BuyIcon from "../../../public/assets/buy.svg";
+import MessagesIcon from "../../../public/assets/messages.svg";
+import PenIcon from "../../../public/assets/pen.svg";
+import SettingsIcon from "../../../public/assets/settings.svg";
+import ContactIcon from "../../../public/assets/contact.svg";
+import { useState, useEffect } from "react";
 // Ignoring the fact that the image name and location need props for initial design
 // Also ignoring that everything is secretly a link
-export default function Sidebar() {
-    const [isCollapsed, setIsCollapsed] = useState(false);
-
+export default function Sidebar({id}) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [userName, setUserName] = useState("");
+  useEffect(() => {
+    const query = `query {
+   dashboard(id: "${id}") {
+     title
+     user(id: "${id}") {
+       username
+     }
+   }
+ }`;
+    console.log("my query: ", query);
+    fetch("http://localhost:5050/Search", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setUserName(data.data.dashboard.user.username);
+        // console.log("name", userNameRef.current)
     return (
       <>
         { isCollapsed ? 

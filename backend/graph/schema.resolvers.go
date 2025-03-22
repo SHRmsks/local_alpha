@@ -17,7 +17,7 @@ func (r *dashBoardResolver) User(ctx context.Context, obj *model.DashBoard, id s
 	collection := r.Resolver.MongoDB.Database("GraphQL").Collection("user")
 	redisclient := r.Resolver.RedisClient
 	var usr model.User
-
+	
 	result, err := redisclient.HGetAll(ctx, id).Result()
 	if err != nil || len(result) == 0 {
 		log.Println("Redis miss, fetching from MongoDB.")
