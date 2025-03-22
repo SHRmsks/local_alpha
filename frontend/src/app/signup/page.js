@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
-
+import Blobs from "@/components/blobs/blobs";
 export default function Signup() {
   const router = useRouter();
 
