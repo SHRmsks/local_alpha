@@ -233,8 +233,8 @@ func main() {
 				},
 			),
 			)
-			// privateURL.Use(Api.AuthenticateProtector(fmt.Sprintf("https://%v.com", domainName)))
-			privateURL.Use(Api.AuthenticateProtector("http://localhost:3000"))
+			privateURL.Use(Api.AuthenticateProtector(fmt.Sprintf("https://%v.com", domainName)))
+			// privateURL.Use(Api.AuthenticateProtector("http://localhost:3000"))
 			privateURL.Options("/", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/login", func(w http.ResponseWriter, r *http.Request) {})
 			privateURL.Options("/signup", func(w http.ResponseWriter, r *http.Request) {})
