@@ -2,7 +2,7 @@
 
 import "@/app/globals.css";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef} from "react";
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
 import logoGoogle from "@/../public/assets/logo-google.svg";
@@ -34,7 +34,11 @@ export default function Login() {
   const [passwordValue, setPasswordValue] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [wrongpassword, setWrongpassword] = useState(false);
+  const wrongtimes = useRef(0)
+  let wrapperTimeout;
   const submitHandler = () => {
+    clearTimeout(wrapperTimeout)
+     wrapperTimeout = setTimeout(() => {
     const jsonfiedLoginVal = JSON.stringify({
       userName: emailValue.toString().trim(),
       password: passwordValue.toString().trim(),
@@ -50,7 +54,13 @@ export default function Login() {
       .then((res) => {
         if (!res.ok) {
           if (res.status === 400){
+            console.log("cuurent wrong times", wrongtimes.current)
+            if (wrongtimes.current >3){
             router.push("/signup")
+          }else{
+            wrongtimes.current += 1
+            setWrongpassword(true)
+          }
             return
           }
           throw new Error("Network Lost");
@@ -68,7 +78,8 @@ export default function Login() {
       .catch((err) => {
         throw new Error("error: ", err);
       });
-  };
+  }, 200)
+};
   console.log("wrong pasword", wrongpassword)
   return (
     <div className="bg-iper-white w-full h-screen flex flex-col justify-center items-center">
