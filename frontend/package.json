@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
+    "motion": "^12.5.0",
     "nanoid": "^3.3.4",
     "next": "15.2.0",
     "react": "^19.0.0",
