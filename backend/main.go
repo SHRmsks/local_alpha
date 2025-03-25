@@ -225,7 +225,7 @@ func main() {
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)},
+					AllowedOrigins:   []string{ /*fmt.Sprintf("https://%v.com", domainName)*/ "https://www.iperuranium.com", fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)},
 					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization", "X-CSRF-Token"},
 					AllowCredentials: true,
