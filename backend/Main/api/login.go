@@ -259,8 +259,10 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 			Path:     "/",
 			HttpOnly: true,
 			MaxAge:   86400,
-			SameSite: http.SameSiteNoneMode,
-			Secure:   true,
+			// SameSite: http.SameSiteNoneMode,
+			SameSite: http.SameSiteLaxMode,
+			// Secure:   true,
+			Domain: "www.iperuranium.com",
 		})
 	w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -276,7 +278,7 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("google call", frontendURL)
 	var googleconfig = &oauth2.Config{
-		ClientID:     "43488699135-6muejl3ggsu962hcav4qc1shuo3jesat.apps.googleusercontent.com",
+		ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
 		ClientSecret: h.googleClientSecret,
 		RedirectURL:  "http://localhost:5050/callback",
 		Endpoint:     google.Endpoint,
@@ -354,8 +356,9 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 			Path:     "/",
 			MaxAge:   86400,
-			SameSite: http.SameSiteNoneMode,
-			Secure:   true,
+			SameSite: http.SameSiteLaxMode,
+			// Secure:   true,
+			Domain: "www.iperuranium.com",
 		})
 	w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
