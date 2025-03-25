@@ -38,6 +38,8 @@ export default function Sidebar({id}) {
       .then((data) => {
         setUserName(data.data.dashboard.user.username);
         // console.log("name", userNameRef.current)
+      })
+    })
     return (
       <>
         { isCollapsed ? 
