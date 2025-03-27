@@ -3,13 +3,28 @@
 import "@/app/globals.css";
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
-import Blobs from "@/components/blobs/blobs";
+import Confetti from 'react-confetti';
+import {useEffect, useState} from 'react';
 
 export default function Confirmation({ name }) {
+  const [size, setSize] = useState({width:0, height:0});
+
+  useEffect(() => {
+    if (typeof window != "undefined") {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+  }, [])
+
   return (
     <div className="bg-iper-white w-full h-screen flex flex-col justify-center items-center">
-      <Blobs/>
-      <div className="z-10 bg-white rounded-[40px] p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit shadow-md flex flex-col justify-center items-center gap-4 lg:gap-6">
+      <Confetti
+        width={size.width}
+        height={size.height}
+      />
+      <div className="p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit flex flex-col justify-center items-center gap-4 lg:gap-6">
         <Image
           src={logo}
           alt="Iper Logo"
