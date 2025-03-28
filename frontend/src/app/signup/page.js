@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
-
+import Blobs from "@/components/blobs/blobs";
 export default function Signup() {
   const router = useRouter();
 
@@ -80,7 +80,8 @@ export default function Signup() {
 
   return (
     <div className="bg-iper-white w-full h-screen flex flex-col justify-center items-center">
-      <div className="bg-white rounded-[40px] p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit shadow-md flex flex-col justify-center items-center gap-4 lg:gap-6">
+      <Blobs/>
+      <div className="z-10 bg-white rounded-[40px] p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit shadow-md flex flex-col justify-center items-center gap-4 lg:gap-6">
         <Image
           src={logo}
           alt="Iper Logo"
