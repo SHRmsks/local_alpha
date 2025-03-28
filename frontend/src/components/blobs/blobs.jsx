@@ -18,7 +18,7 @@ export default function Blobs() {
                     transform: rotate(0deg) scale(0.6);
                 }
                 50% {
-                    transform: rotate(180deg) scale(1.2);
+                    transform: rotate(180deg) scale(1);
                 }
                 100% {
                     transform: rotate(360deg) scale(0.6);
@@ -37,13 +37,13 @@ export default function Blobs() {
             }
             @keyframes rotate3 {
                 0% {
-                    transform: translate(0, 30px) scale(0.6);
+                    transform: translate(0, 30px) scale(0.4);
                 }
                 50% {
-                    transform: translate(0, -30px) scale(1.2);
+                    transform: translate(0, -30px) scale(0.8);
                 }
                 100% {
-                    transform: translate(0, 30px) scale(0.6);
+                    transform: translate(0, 30px) scale(0.4);
                 }
             }
             @keyframes rotate4 {
