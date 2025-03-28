@@ -9,7 +9,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
-            <body><Suspense><GoogleOAuthProvider clientId="43488699135-6muejl3ggsu962hcav4qc1shuo3jesat.apps.googleusercontent.com">{children}</GoogleOAuthProvider></Suspense></body>
+            <body><Suspense><GoogleOAuthProvider clientId="70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com">{children}</GoogleOAuthProvider></Suspense></body>
         </html>
     );
 }

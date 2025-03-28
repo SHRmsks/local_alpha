@@ -1,372 +1,144 @@
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { useEffect } from "react";
-
-function Blob({ xValue, yValue, className }) {
-    const variants = {
-        animate: {
-            borderRadius: [
-                "42% 58% 63% 37% / 45% 52% 48% 55%",
-                "67% 33% 52% 48% / 36% 65% 35% 64%",
-                "55% 45% 40% 60% / 70% 30% 65% 35%",
-                "28% 72% 65% 35% / 42% 58% 38% 62%",
-                "45% 55% 70% 30% / 55% 45% 60% 40%",
-                "33% 67% 58% 42% / 63% 37% 42% 58%",
-                "50% 50% 34% 66% / 37% 63% 70% 30%",
-                "42% 58% 63% 37% / 45% 52% 48% 55%",
-            ],
-            width: [700, 400, 550, 450, 600, 400, 500, 700],
-            height: [400, 600, 550, 600, 450, 700, 500, 400],
-            x: xValue,
-            y: yValue,
-        },
-    };
-    const transition = {
-        default: {
-            duration: 80,
-            repeat: Infinity,
-            ease: "easeInOut",
-            repeatType: "mirror",
-        },
-        borderRadius: {
-            duration: 80,
-            repeat: Infinity,
-            ease: "easeInOut",
-            repeatType: "mirror",
-        },
-        x: {
-            duration: 80,
-            repeat: Infinity,
-            ease: "linear",
-            repeatType: "loop",
-        },
-        y: {
-            duration: 80,
-            repeat: Infinity,
-            ease: "linear",
-            repeatType: "loop",
-        },
-    };
-
-    return (
-        <motion.div
-            animate={"animate"}
-            variants={variants}
-            transition={transition}
-            className={`${className} absolute opacity-50`}
-        />
-    );
-}
-
+import { useState, useEffect } from "react"
 export default function Blobs() {
-    return (
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <Blob
-                xValue={[
-                    "25vw",
-                    "40vw",
-                    "55vw",
-                    "70vw", // UP
-                    "85vw", // UP
-                    "90vw", // UP
-                    "85vw", // UP
-                    "70vw", // UP
-                    "55vw",
-                    "40vw",
-                    "25vw",
-                    "17.5vw",
-                    "10vw", // Down
-                    "-5vw", // Down
-                    "-10vw", // Down
-                    "-5vw", // Down
-                    "10vw", // Down
-                    "17.5vw",
-                    "25vw",
-                ]}
-                yValue={[
-                    "75vh",
-                    "70vh",
-                    "75vh",
-                    "55vh", // UP
-                    "40vh", // UP
-                    "25vh", // UP
-                    "10vh", // UP
-                    "-5vh", // UP
-                    "-10vh",
-                    "-5vh",
-                    "-10vh",
-                    "0vh",
-                    "10vh", // Down
-                    "25vh", // Down
-                    "40vh", // Down
-                    "55vh", // Down
-                    "65vh", // Down
-                    "70vh",
-                    "75vh",
-                ]}
-                className={"bg-iper-gold"}
-            />
-            <Blob
-                xValue={[
-                    "90vw", // UP
-                    "85vw", // UP
-                    "70vw",
-                    "55vw",
-                    "40vw",
-                    "25vw",
-                    "10vw",
-                    "5vw", // Down
-                    "-10vw", // Down
-                    "05vw", // Down
-                    "-10vw", // Down
-                    "-5vw", // Down
-                    "-10vw", // Down
-                    "-5vw", // Down
-                    "10vw",
-                    "25vw",
-                    "40vw",
-                    "55vw",
-                    "70vw",
-                    "85vw", // UP
-                    "90vw", // UP
-                    "85vw",
-                    "90vw",
-                    "90vw",
-                ]}
-                yValue={[
-                    "10vh",
-                    "-5vh",
-                    "0vh",
-                    "-5vh",
-                    "-10vh",
-                    "-5vh",
-                    "-10vh",
-                    "-5vh", // Down
-                    "-10vh", // Down
-                    "5vh", // Down
-                    "20vh", // Down
-                    "35vh", // Down
-                    "50vh", // Down
-                    "75vh", // Down
-                    "80vh",
-                    "85vh",
-                    "90vh",
-                    "80vh",
-                    "70vh",
-                    "60vh",
-                    "50vh",
-                    "40vh",
-                    "30vh",
-                    "10vh",
-                ]}
-                className={"bg-iper-blue opacity-40"}
-            />
-            <Blob
-                xValue={[
-                    "10vw",
-                    "25vw",
-                    "40vw",
-                    "55vw",
-                    "70vw",
-                    "80vw",
-                    "90vw", // Down
-                    "85vw", // Down
-                    "90vw", // Down
-                    "85vw", // Down
-                    "90vw", // Down
-                    "85vw", // Down
-                    "70vw",
-                    "55vw",
-                    "40vw",
-                    "25vw",
-                    "10vw",
-                    "5vw", // Down
-                    "-10vw", // Down
-                    "05vw", // Down
-                    "-10vw", // Down
-                    "-5vw", // Down
-                    "-10vw", // Down
-                    "-5vw", // Down
-                    "10vw",
-                ]}
-                yValue={[
-                    "-10vh",
-                    "-5vh",
-                    "0vh",
-                    "-5vh",
-                    "0vh",
-                    "5vh",
-                    "20vh", // Down
-                    "35vh", // Down
-                    "50vh", // Down
-                    "65vh", // Down
-                    "80vh", // Down
-                    "90vh", // Down
-                    "85vh",
-                    "80vh",
-                    "85vh",
-                    "80vh",
-                    "85vh",
-                    "75vh", // UP
-                    "60vh", // UP
-                    "45vh", // UP
-                    "30vh", // UP
-                    "15vh", // UP
-                    "0vh", // UP
-                    "-5vh", // UP
-                    "-10vh",
-                ]}
-                className={"bg-blue-200"}
-            />
-            <Blob
-                xValue={[
-                    "-5vw",
-                    "-10vw", // Down
-                    "-5vw", // Down
-                    "-10vw",
-                    "-5vw",
-                    "-10vw",
-                    "-5vw",
-                    "0vw",
-                    "5vw",
-                    "10vw",
-                    "20vw",
-                    "30vw",
-                    "40vw",
-                    "50vw",
-                    "60vw",
-                    "70vw",
-                    "80vw",
-                    "90vw", // Down
-                    "85vw", // Down
-                    "90vw", // Down
-                    "85vw", // Down
-                    "90vw", // Down
-                    "85vw", // Down
-                    "70vw",
-                    "60vw",
-                    "50vw",
-                    "40vw",
-                    "30vw",
-                    "20vw",
-                    "10vw",
-                    "5vw", // Down
-                    "-10vw", // Down
-                    "05vw", // Down
-                    "-10vw", // Down
-                    "-5vw", // Down
-                ]}
-                yValue={[
-                    "45vh", // UP
-                    "35vh", // UP
-                    "25vh", // UP
-                    "15vh",
-                    "5vh",
-                    "0vh", // UP
-                    "-5vh", // UP
-                    "-10vh",
-                    "-5vh",
-                    "-10vh",
-                    "-5vh",
-                    "0vh",
-                    "-5vh",
-                    "0vh",
-                    "-5vh",
-                    "0vh",
-                    "5vh",
-                    "0vh",
-                    "5vh",
-                    "20vh", // Down
-                    "35vh", // Down
-                    "50vh",
-                    "65vh", // Down
-                    "80vh", // Down
-                    "90vh", // Down
-                    "85vh",
-                    "80vh",
-                    "85vh",
-                    "80vh",
-                    "85vh",
-                    "80vh",
-                    "85vh",
-                    "75vh", // UP
-                    "60vh", // UP
-                    "45vh",
-                ]}
-                className={"bg-yellow-200"}
-            />
-            <Blob
-                xValue={[
-                    "70vw",
-                    "60vw",
-                    "50vw",
-                    "40vw",
-                    "30vw",
-                    "20vw",
-                    "10vw",
-                    "5vw",
-                    "0vw",
-                    "-5vw",
-                    "-10vw",
-                    "-5vw",
-                    "-10vw",
-                    "-5vw",
-                    "-10vw",
-                    "-10vw",
-                    "-5vw",
-                    "5vw",
-                    "10vw",
-                    "20vw",
-                    "30vw",
-                    "40vw",
-                    "50vw",
-                    "60vw",
-                    "70vw",
-                    "85vw",
-                    "90vw",
-                    "85vw",
-                    "90vw",
-                    "85vw",
-                    "90vw",
-                    "80vw",
-                    "70vw",
-                ]}
-                yValue={[
-                    "60vh", // UP
-                    "75vh", // UP
-                    "85vh",
-                    "80vh",
-                    "85vh",
-                    "80vh",
-                    "85vh",
-                    "80vh",
-                    "85vh",
-                    "90vh", // Down
-                    "80vh", // Down
-                    "65vh", // Down
-                    "50vh",
-                    "35vh", // Down
-                    "20vh", // Down
-                    "5vh",
-                    "0vh",
-                    "5vh",
-                    "0vh",
-                    "-5vh",
-                    "0vh",
-                    "-5vh",
-                    "0vh",
-                    "-5vh",
-                    "-10vh",
-                    "-5vh",
-                    "0vh", // UP
-                    "5vh",
-                    "15vh",
-                    "25vh", // UP
-                    "35vh", // UP
-                    "45vh", // UP
-                    "60vh",
-                ]}
-                className={"bg-gray-300"}
-            />
-        </div>
-    );
+  const [delay, setDelay] = useState(0);
+  useEffect(() => {
+    setDelay(-Math.random()*40-20);
+  }, []);
+  return (
+    <svg
+      preserveAspectRatio="xMidYMid slice"
+      viewBox="0 0 1500 982"
+      className="fixed top-0 left-0 w-full h-full"
+    >
+      <defs>
+        <style>
+          {`
+            @keyframes rotate {
+				0% {
+                    transform: rotate(0deg) scale(0.6);
+                }
+                50% {
+                    transform: rotate(180deg) scale(1);
+                }
+                100% {
+                    transform: rotate(360deg) scale(0.6);
+                }
+            }
+            @keyframes rotate2 {
+                0% {
+                    transform: rotate(0deg) scale(0.6);
+                }
+                50% {
+                    transform: rotate(180deg) scale(1);
+                }
+                100% {
+                    transform: rotate(360deg) scale(0.6);
+                }
+            }
+            @keyframes rotate3 {
+                0% {
+                    transform: translate(0, 30px) scale(0.4);
+                }
+                50% {
+                    transform: translate(0, -30px) scale(0.8);
+                }
+                100% {
+                    transform: translate(0, 30px) scale(0.4);
+                }
+            }
+            @keyframes rotate4 {
+                0% {
+                    transform: translate(0, 0px) scale(1.2);
+                }
+                50% {
+                    transform: translate(30px, 30px) scale(1.4);
+                }
+                100% {
+                    transform: translate(0, 0px) scale(1.2);
+                }
+            }
+            .blob1 {
+                animation: rotate 80s linear infinite;
+                transform-origin: 1359px 0px;
+                animation-delay: `+delay+`s;
+            }
+            .circle1 {
+                animation: rotate3 30s linear infinite;
+                transform-origin: 1400px 618px;
+                animation-delay: `+delay+`s;
+            }
+            .circle2 {
+                animation: rotate3 24s linear infinite;
+                transform-origin: -2.5px 264px;
+                animation-delay: `+delay+`s;
+            }
+            .blob2 {
+                animation: rotate2 100s linear infinite;
+                transform-origin: 80px 896px;
+                animation-delay: `+delay+`s;
+            }
+            .circle3 {
+                animation: rotate3 40s linear infinite;
+                transform-origin: 1425px 137px;
+                animation-delay: `+delay+`s;
+            }
+            .line {
+                animation: rotate4 30s linear infinite;
+                transform-origin: 1613px 700px;
+                animation-delay: `+delay+`s;
+            }
+            .circle4 {
+                animation: rotate4 20s linear infinite;
+                transform-origin: -11px -145px;
+                animation-delay: `+delay+`s;
+            }
+                `}
+        </style>
+        <linearGradient
+          id="paint3_linear_704_13763"
+          x1="1134.67"
+          y1="897.87402"
+          x2="1612.11"
+          y2="931.67902"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0.16" stopColor="#2CABE1" id="stop955" />
+          <stop offset="0.43" stopColor="#CEC87E" id="stop956" />
+          <stop offset="0.61" stopColor="#F9DB4D" id="stop957" />
+          <stop offset="0.73" stopColor="#C4A044" id="stop958" />
+          <stop offset="0.79" stopColor="#8D6339" id="stop959" />
+          <stop offset="0.88" stopColor="#372C17" id="stop960" />
+          <stop offset="1" stopColor="#372C17" id="stop961" />
+        </linearGradient>
+      </defs>
+      <path
+        fill="#F6DD91"
+        className="blob2"
+        d="M 69.335336,1277.2057 c 161.803424,0 292.971994,-152.971 292.971994,-341.69537 0,-188.71223 -131.16857,-341.6954 -292.971994,-341.6954 -161.803426,0 -292.972006,152.98317 -292.972006,341.6954 0,188.72437 131.16858,341.69537 292.972006,341.69537 z"
+      />
+      <path
+        fill="#9BD3E4"
+        className="circle1"
+        d="M 1399.72,664.545 c 26.27,0 47.57,-20.999 47.57,-46.903 0,-25.904 -21.3,-46.904 -47.57,-46.904 -26.27,0 -47.57,21 -47.57,46.904 0,25.904 21.3,46.903 47.57,46.903 z"
+      />
+      <path
+        fill="#385CA5"
+        className="circle2"
+        d="M -2.5,323 C 30.3609,323 57,296.585 57,264 57,231.415 30.3609,205 -2.5,205 c -32.8609,0 -59.5,26.415 -59.5,59 0,32.585 26.6391,59 59.5,59 z"
+      />
+      <path
+        fill="#385CA5"
+        className="blob1"
+        d="M 1259.1783,225.92423 c 226.0109,0 409.2304,-152.628263 409.2304,-340.9298 0,-188.28938 -183.2195,-340.92976 -409.2304,-340.92976 -226.0109,0 -409.23036,152.64038 -409.23036,340.92976 0,188.301537 183.21946,340.9298 409.23036,340.9298 z"
+      />
+      <path
+        fill="#F5DE87"
+        className="circle3"
+        d="M 1527.5,481 c 55.5,0 100.49,-76.559 100.49,-171 0,-94.441 -44.99,-171 -100.49,-171 -55.51,0 -100.5,76.559 -100.5,171 0,94.441 44.99,171 100.5,171 z"
+      />
+      <path className="line" fill="url(#paint3_linear_704_13763)" d="m 1613.13,700.667 c -0.11,2.234 -0.33,4.448 -0.68,6.666 -0.09,0.547 -0.2,1.093 -0.29,1.64 -0.32,1.866 0.38,-1.52 -0.07,0.322 -0.3,1.256 -0.6,2.512 -0.97,3.764 -0.62,2.128 -1.35,4.234 -2.19,6.289 -0.35,0.856 -0.72,1.71 -1.09,2.563 -0.24,0.509 -0.47,1.018 -0.71,1.512 -0.16,0.329 -0.33,0.672 -0.49,1.001 0.41,-0.808 0.42,-0.849 0.06,-0.151 -2.25,4.127 -4.74,8.068 -7.63,11.781 -0.69,0.888 -1.41,1.774 -2.13,2.631 -0.31,0.362 -0.62,0.709 -0.92,1.071 -0.73,0.871 1.14,-1.211 -0.11,0.135 -1.66,1.798 -3.37,3.565 -5.17,5.241 -3.5,3.273 -7.26,6.271 -11.21,9 -0.33,0.233 -0.68,0.464 -1.02,0.695 1.31,-0.886 -0.37,0.244 -0.53,0.346 -1.03,0.665 -2.07,1.301 -3.11,1.937 -2.27,1.359 -4.57,2.643 -6.92,3.869 -4.33,2.248 -8.79,4.274 -13.34,6.096 -2.28,0.917 -4.57,1.791 -6.87,2.622 -0.58,0.214 -1.15,0.415 -1.73,0.616 -0.19,0.071 -2.13,0.729 -0.59,0.2 -1.36,0.457 -2.72,0.9 -4.08,1.343 -20.21,6.433 -41.1,10.945 -61.98,14.577 -20.87,3.632 -43.67,6.39 -65.66,8.112 -2.7,0.207 -5.4,0.413 -8.1,0.591 -1.34,0.09 -2.69,0.178 -4.05,0.267 -2.22,0.141 1.43,-0.083 -0.8,0.057 -0.89,0.05 -1.79,0.114 -2.69,0.164 -5.36,0.316 -10.72,0.576 -16.09,0.806 -10.51,0.434 -21.02,0.726 -31.54,1.06 -21.22,0.655 -42.47,1.436 -63.6,3.731 -20.73,2.251 -41.32,6.088 -61.11,12.778 -17.4,5.88 -33.68,14.096 -48.64,24.805 -28.28,20.214 -50.86,49.874 -56.35,84.776 -0.65,4.07 -1.01,8.18 -1.14,12.3 -0.11,3.69 2.62,7.45 6.56,7.56 3.71,0.09 7.44,-2.6 7.56,-6.56 0.14,-4.3 0.53,-8.57 1.22,-12.81 0.17,-1.01 0.36,-2 0.54,-3.01 0.33,-1.74 -0.36,1.59 0.03,-0.13 0.1,-0.49 0.22,-0.99 0.33,-1.48 0.46,-1.97 0.99,-3.93 1.57,-5.88 1.2,-4.04 2.66,-8 4.36,-11.854 0.74,-1.707 1.54,-3.383 2.36,-5.043 0.76,-1.578 -0.74,1.382 0.09,-0.177 0.25,-0.451 0.48,-0.904 0.72,-1.341 0.56,-1.039 1.14,-2.077 1.74,-3.113 4.23,-7.296 9.23,-14.039 14.74,-20.406 1.16,-1.352 -1.03,1.105 0.18,-0.2 0.36,-0.387 0.71,-0.773 1.06,-1.146 0.71,-0.759 1.43,-1.517 2.15,-2.275 1.46,-1.501 2.94,-2.986 4.46,-4.425 3.18,-3.026 6.5,-5.914 9.92,-8.653 3.41,-2.739 6.71,-5.175 10.22,-7.567 0.43,-0.296 0.86,-0.606 1.31,-0.887 -1.53,0.971 0,0 0.27,-0.165 0.89,-0.576 1.78,-1.151 2.69,-1.712 1.94,-1.225 3.92,-2.405 5.91,-3.541 7.34,-4.194 14.97,-7.841 22.84,-10.918 8.43,-3.293 17.52,-6.013 27.56,-8.383 10.04,-2.37 20.42,-4.204 30.74,-5.56 10.32,-1.356 20.84,-2.287 31.28,-2.981 2.14,-0.147 -1.47,0.081 0.67,-0.038 0.64,-0.039 1.28,-0.079 1.92,-0.119 1.29,-0.079 2.57,-0.145 3.87,-0.209 2.58,-0.13 5.14,-0.26 7.72,-0.376 5.37,-0.244 10.75,-0.431 16.12,-0.619 21.59,-0.714 43.17,-1.259 64.73,-2.713 43.58,-2.933 87.38,-8.974 129.43,-21.073 19.78,-5.696 39.19,-13.237 55.77,-25.691 15.13,-11.363 27.81,-27.7 32.68,-46.192 1.24,-4.738 2.09,-9.605 2.33,-14.499 0.19,-3.691 -2.68,-7.458 -6.56,-7.562 -3.88,-0.105 -7.37,2.601 -7.57,6.562 z"/>
+      <path className="circle4" fill="#9BD3E4"
+       d="M 197.58152,194.13347 c 114.042,0 206.492,-75.43 206.492,-168.489996 0,-93.054003 -92.45,-168.490004 -206.492,-168.490004 -114.042002,0 -206.4920016,75.436001 -206.4920016,168.490004 0,93.059996 92.4499996,168.489996 206.4920016,168.489996 z"/>
+    </svg>
+  );
 }
