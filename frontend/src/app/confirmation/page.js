@@ -42,7 +42,7 @@ export default function Confirmation({ name }) {
           </p>
         </div>
         <p className="text-iper-blue text-lg md:text-xl lg:text-2xl mt-8">
-          Get started
+          Get started -&gt;
         </p>
       </div>
     </div>
