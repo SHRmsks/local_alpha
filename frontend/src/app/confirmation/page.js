@@ -23,21 +23,27 @@ export default function Confirmation({ name }) {
       <Confetti
         width={size.width}
         height={size.height}
+        colors={["#124A9D", "#F5DE87", "#F0D077", "#A6D8EB"]}
+        numberOfPieces={500}
+        recycle={false}
       />
-      <div className="p-8 w-80 md:w-96 lg:w-[448px] lg:h-[602px] h-fit flex flex-col justify-center items-center gap-4 lg:gap-6">
+      <div className="w-fit lg:h-[602px] h-fit flex flex-col justify-center items-center gap-4 lg:gap-6 font-krub">
         <Image
           src={logo}
           alt="Iper Logo"
-          className="size-10 md:size-14 lg:size-16 lg:mb-1"
+          className="size-16 md:size-20 lg:size-24 lg:mb-1"
         />
-        <h1 className="font-krub font-extrabold text-2xl md:text-3xl lg:text-4xl">
+        <h1 className="font-extrabold text-3xl md:text-4xl lg:text-5xl">
           Your first milestone!
         </h1>
         <div className="flex justify-center items-center gap-6 w-full">
-          <p className="text-[10px] md:text-lg text-[#707070]">
-            Welcome to Iperuranium{name !== undefined ? ", "+name : ""}.
+          <p className="text-xl md:text-2xl lg:text-3xl">
+            Welcome to IPER{name !== undefined ? ", "+name : ""}.
           </p>
         </div>
+        <p className="text-iper-blue text-lg md:text-xl lg:text-2xl mt-8">
+          Get started
+        </p>
       </div>
     </div>
   );
