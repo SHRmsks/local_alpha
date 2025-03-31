@@ -1,50 +1,203 @@
 schema {
   query: Query
+  mutation: Mutation
 }
+
 type Query {
-  dashboard(id: ID!): DashBoard
+  dashboard(id: ID!): Dashboard
 }
+
 type Mutation {
-  dashboard(id: ID!): DashBoard
+  createDashboard(title: String!): Dashboard
+  updateDashboard(id: ID!, title: String!): Dashboard
+  deleteDashboard(id: ID!): Boolean
 }
-type DashBoard {
-  user(id: ID!): User!
+
+type Dashboard {
+  id: ID!
+  owner: User!
   title: String!
 }
 
-type User {
+interface User {
+  id: ID!
   username: String!
-  occupation: Company!
-  companyFollows: Follow!
-  networks: Networks!
-  posts: [Post]!
-  # subscription: Subscription!
-  # notes: Notes
-  # history: histories
+  userInfo: UserInfo!
+}
+
+type GeneralUser implements User {
+  id: ID!
+  username: String!
+  userInfo: UserInfo!
+  education: String
+  company: Company
+  focusAreas: [String!]!
+  areasOfInterest: [String!]!
+  skills: [String!]!
+  awardsAndCertifications: [String!]
+  hobbies: [String!]
+  subscription: SubscriptionType!
+}
+
+type VCUser implements User {
+  id: ID!
+  username: String!
+  userInfo: UserInfo!
+  currentInvestments: [Investment!]
+  exitedInvestments: [Investment!]
+  vcNotes: [VCNote!]
+  vcFirmID: ID!
+  vcFirm: VCFirm!
+  education: String!
+  focusAreas: [String!]!
+  areasOfInterest: [String!]!
+  skills: [String!]!
+  awardsAndCertifications: [String!]
+  hobbies: [String!]
+  fundsRaised: Float
+  # extra vc-specific fields
+}
+
+type Investment {
+  investmentID: ID!
+  investmentName: String!
+  investmentInfo: InvestmentInfo!
+}
+
+type InvestmentInfo {
+  investmentID: ID!
+  investmentDate: String!
+  investmentAmount: Float!
+  investmentType: String!
+  investmentLocation: String!
+  investmentStage: String!
+  investmentImages: [String!]
+  companyID: ID
+  company: Company
+}
+
+type VCNote {
+  noteID: ID!
+  companyID: ID!
+  company: Company!
+  noteDate: String!
+  noteBody: String!
+  noteImages: [String!]
+}
+
+type VCFirm {
+  vcFirmID: ID!
+  vcFirmName: String!
+  vcFirmMembers: [VCUser!]!
+  vcFirmInfo: VCFirmInfo!
+}
+
+type VCFirmInfo {
+  # needs editing
+  vcFirmID: ID!
+  foundedYear: Int!
+  totalFundsManaged: Float!
+  investmentFocus: [String!]!
+  website: String
+}
+
+type CompanyUser implements User {
+  id: ID!
+  username: String!
+  userInfo: UserInfo!
+  companyID: ID!
+  company: Company!
+  # more company-specific fields
+}
+
+type GroupUser implements User {
+  id: ID!
+  username: String!
+  userInfo: UserInfo!
+  groupID: ID!
+  group: Group!
+  # more group-specific fields
+}
+
+type UserInfo {
+  userID: ID!
+  icon: String!
+  intro: String
+  groups: [Group!]
+  posts: [Post!]
+  follows: [ID!]
+  followers: [ID!]
+}
+
+enum SubscriptionType {
+  FREE
+  BASIC
+  PREMIUM
 }
 
 type Company {
+  companyID: ID!
   companyName: String!
-  companyID: String!
+  companyInfo: CompanyInfo!
+}
+
+type CompanyInfo {
+  companyID: ID!
   location: String!
   intro: String!
   icon: String!
+  foundingYear: Int!
+  companyUserID: ID!
+  companyUser: CompanyUser!
+  companyMembers: [ID!]!
 }
 
-type Follow {
-  userID: ID!
-  usersFollow: [User]!
+type Group {
+  groupID: ID!
+  groupName: String!
+  groupInfo: GroupInfo!
 }
-type Networks {
-  userID: ID!
-  companys: [Company]!
+
+type GroupInfo {
+  groupID: ID!
+  intro: String!
+  icon: String!
+  groupUserID: ID!
+  groupUser: GroupUser!
+  groupMembers: [ID!]!
 }
+
 type Post {
-  postTitle: String!
   postID: ID!
-  postUser: User!
+  postTitle: String!
+  postInfo: PostInfo!
+}
+
+type PostInfo {
+  postID: ID!
+  postTitle: String!
+  postDate: String!
+  postBody: String!
+  postImages: [String!]
+  comments: [Comment!]
   userID: ID!
-  body: String!
-  comments: [String]!
-  followers: [User!]
+  likeCount: Int!
+  likes: [ID!]
+}
+
+type Comment {
+  commentID: ID!
+  commentInfo: CommentInfo!
+}
+
+type CommentInfo {
+  commentID: ID!
+  commentDate: String!
+  commentBody: String!
+  commentImages: [String!]
+  parentComment: Comment
+  replies: [Comment!]
+  authorId: ID!
+  likeCount: Int!
+  likes: [ID!]
 }
