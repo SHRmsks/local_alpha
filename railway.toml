@@ -1,0 +1,4 @@
+builder = "NIXPACKS"
+image = "golang:1.20"
+buildCommand = "cd backend && go mod tidy && go get"
+startCommand = "go run main.go"
