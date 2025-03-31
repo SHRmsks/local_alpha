@@ -356,9 +356,9 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 			Path:     "/",
 			MaxAge:   86400,
-			SameSite: http.SameSiteLaxMode,
-			// Secure:   true,
-			Domain: ".iperuranium.com",
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
+			Domain: "www.iperuranium.com",
 		})
 	w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
