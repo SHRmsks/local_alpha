@@ -5,6 +5,8 @@ import NotGridIcon from '../../../public/assets/gridNot.svg'
 import ColumnIcon from '../../../public/assets/columns.svg'
 import NotColumnIcon from '../../../public/assets/columnsNot.svg'
 import SearchIcon from '../../../public/assets/search.svg'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState, useEffect } from 'react'
 
@@ -87,7 +89,7 @@ export default function VCDashboard() {
     };
 
     return (
-        <div className="2xl:w-[60%] xl:w-[70%] w-[80%] gap-6">
+        <div className="2xl:w-[60%] xl:w-[70%] w-[80%] space-y-6">
             <div className="flex justify-between">
                 <p className="text-3xl">VC Dashboard</p>
                 <div className="flex">
@@ -124,7 +126,31 @@ export default function VCDashboard() {
                         dataLength={dataLength.length}
                         next={fetchMoreData}
                         hasMore={true}
-                        loader={<h4 className="text-2xl p-4">Loading...</h4>}
+                        loader={ isRows ? (
+                            <div className="flex w-[95%] m-auto mt-6 overflow-hidden">
+                                <Skeleton className="w-[149px] h-[130px]" />
+                                <div className="flex flex-col shadow-md w-full h-[130px] bg-[#FFFEFA] gap-3 p-3">
+                                    <Skeleton className="h-[20px]" />
+                                    <Skeleton count={3} />
+                                    <hr />
+                                    <Skeleton className="w-[30%]" />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="grid lg:grid-cols-3 sm:grid-cols-2 justify-items-center gap-x-4 gap-y-8 mt-8 overflow-hidden">
+                                {Array.from({ length: numberOfColumns }).map((_, i) => (  
+                                    <div key={i} className="w-[270px] h-[270px] bg-[#FFFEFA] shadow-md">
+                                        <div className="flex flex-col gap-2 p-3">
+                                            <Skeleton className="w-[246px] h-[120px]" />
+                                            <Skeleton className="h-[20px]" />
+                                            <Skeleton className="h-[12px]" count={2} />
+                                            <hr />
+                                            <Skeleton className="w-[30%]" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     >
                         { isRows ? (
                             <div className="flex flex-col gap-6" key="rowLayout">

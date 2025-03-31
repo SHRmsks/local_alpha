@@ -1,5 +1,5 @@
 import Image from "next/image";
-import BackArrowIcon from "../../../public/assets/backArrow.svg";
+import BackArrowIcon from "../../../public/assets/backArrow2.svg";
 import Pic from "../../../public/assets/pic.svg";
 import CompaniesIcon from "../../../public/assets/companies.svg";
 import NetworkIcon from "../../../public/assets/network.svg";
@@ -18,13 +18,13 @@ export default function Sidebar({id}) {
   const [userName, setUserName] = useState("");
   useEffect(() => {
     const query = `query {
-   dashboard(id: "${id}") {
-     title
-     user(id: "${id}") {
-       username
-     }
-   }
- }`;
+      dashboard(id: "${id}") {
+        title
+        user(id: "${id}") {
+          username
+        }
+      }
+    }`;
     console.log("my query: ", query);
     fetch("http://localhost:5050/Search", {
       method: "POST",
@@ -40,6 +40,7 @@ export default function Sidebar({id}) {
         // console.log("name", userNameRef.current)
       })
     })
+
     return (
       <>
         { isCollapsed ? 
