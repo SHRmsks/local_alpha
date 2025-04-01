@@ -89,18 +89,21 @@ func main() {
 	done := make(chan struct{})
 	go func() {
 		defer wg.Done()
+		contxt, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
 		opt, err := redis.ParseURL(redisAddr)
 		if err != nil {
 			errorChan <- err
 		}
 		rdb = redis.NewClient(opt)
-		if err1 := rdb.Ping(context.Background()).Err(); err1 != nil {
+		if err1 := rdb.Ping(contxt).Err(); err1 != nil {
 			errorChan <- err1
 		}
 	}() // redis go routinue initialized
 
 	go func() {
 		defer wg.Done()
+
 		contxt, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel() // Ensure context is canceled after use
 
@@ -110,22 +113,25 @@ func main() {
 			return
 		}
 		mongoClient = client
+		return
 	}() // mongodb initialized
 
 	go func() {
 		defer wg.Done()
+		contxt, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
 		config, _ := pgxpool.ParseConfig(PSQLURL)
 		config.ConnConfig.DialFunc = (&net.Dialer{
 			LocalAddr: &net.TCPAddr{IP: net.IPv4zero},
 			KeepAlive: 30 * time.Second,
 			DualStack: false,
 		}).DialContext
-		conn, err := pgxpool.NewWithConfig(context.Background(), config)
+		conn, err := pgxpool.NewWithConfig(contxt, config)
 		if err != nil {
 			errorChan <- err
 		}
 		pgPool = conn
-
+		return
 	}() // initialize psql db
 	go func() {
 		for err := range errorChan {
@@ -141,7 +147,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			case <-done:
-				go heartbeats(pgPool, context.Background(), rdb)
+				go heartbeats(pgPool, ctx, rdb)
 				return
 			}
 
