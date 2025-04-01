@@ -127,7 +127,7 @@ func main() {
 
 	/*backend Server*/
 	server := &http.Server{
-		Addr:    ":" + port,
+		Addr:    "0.0.0.0:" + port,
 		Handler: r,
 	}
 	var mongoClient *mongo.Client
@@ -254,7 +254,6 @@ func main() {
 	// main routes
 
 	log.Println("Server is running on port", port)
-
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server failed: %v", err)
 	}
