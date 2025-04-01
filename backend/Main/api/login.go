@@ -172,7 +172,7 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 		ClientID:     "77nme6nzlhmnlv",
 		ClientSecret: h.linkedinClientSecret,
 		Scopes:       []string{"openid", "profile", "email"},
-		RedirectURL:  "http://api.iperuranium/linkedin/callback",
+		RedirectURL:  "https://api.iperuranium/linkedin/callback",
 		Endpoint: oauth2.Endpoint{
 			AuthURL:   "https://www.linkedin.com/oauth/v2/authorization",
 			TokenURL:  "https://www.linkedin.com/oauth/v2/accessToken",
@@ -280,7 +280,7 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	var googleconfig = &oauth2.Config{
 		ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
 		ClientSecret: h.googleClientSecret,
-		RedirectURL:  "http://api.iperuranium.com/callback",
+		RedirectURL:  "https://api.iperuranium.com/callback",
 		Endpoint:     google.Endpoint,
 		Scopes:       []string{"openid", "profile", "email"},
 	}
@@ -296,7 +296,7 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	token, err := googleconfig.Exchange(context, tempCode)
 
 	if err != nil {
-		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
+		http.Error(w, "Error with Google Server1", http.StatusInternalServerError)
 		return
 	}
 
@@ -305,7 +305,7 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	client := googleconfig.Client(context, token)
 	res, err := client.Get(fmt.Sprintf("https://oauth2.googleapis.com/tokeninfo?id_token=%v", idToken))
 	if err != nil {
-		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
+		http.Error(w, "Error with Google Server2", http.StatusInternalServerError)
 		return
 	}
 	defer res.Body.Close()
@@ -313,7 +313,7 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	var googleInfo map[string]interface{}
 	err = json.NewDecoder(res.Body).Decode(&googleInfo)
 	if err != nil {
-		http.Error(w, "Error with Google Server", http.StatusInternalServerError)
+		http.Error(w, "Error with Google Server1", http.StatusInternalServerError)
 		return
 	}
 	email, ok1 := googleInfo["email"].(string)
