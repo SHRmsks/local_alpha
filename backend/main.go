@@ -32,6 +32,32 @@ type AuroraSecret struct {
 	DBName   string `json:"dbname"`
 }
 
+func heartbeats(pool *pgxpool.Pool, ctx context.Context) {
+	timeout := time.NewTicker(10 * time.Minute)
+	log.Println("called heartbeats")
+	defer timeout.Stop()
+	_, err := pool.Query(ctx, "SELECT 1")
+	if err != nil {
+		log.Panicln("Database down, ", err)
+		return
+	}
+	for range timeout.C {
+		select {
+		case <-ctx.Done():
+			log.Println("shutting down gracefully")
+			return
+		default:
+			_, err := pool.Query(ctx, "SELECT 1")
+			if err != nil {
+				log.Fatalln("Database down, ", err)
+			} else {
+				log.Println("sending Heartbeats successfully", timeout.C)
+			}
+
+		}
+
+	}
+}
 func main() {
 	// load configuration
 	err := godotenv.Load()
@@ -80,6 +106,7 @@ func main() {
 		})
 
 	}()
+
 	// Initialize mongo db database
 	go func() {
 		defer wg.Done()
@@ -110,6 +137,7 @@ func main() {
 
 		}
 		pgPool = conn
+		go heartbeats(pgPool, context.Background())
 
 	}()
 	go func() {
@@ -128,6 +156,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Having trouble starting mongo Session")
 	}
+
 	gqlResolver := &graph.Resolver{
 		PsqlPool:     pgPool,
 		MongoDB:      mongoClient,
@@ -189,7 +218,7 @@ func main() {
 
 	// main routes
 
-	log.Println("debugger Server is running on port", server.Addr)
+	log.Println("Backend Server is running on port", server.Addr)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server failed: %v", err)
 	}
