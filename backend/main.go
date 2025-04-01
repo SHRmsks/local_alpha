@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"sync"
@@ -96,7 +96,13 @@ func main() {
 	go func() {
 		defer wg.Done()
 
-		conn, err := pgxpool.New(context.Background(), PSQLURL)
+		config, _ := pgxpool.ParseConfig(PSQLURL)
+		config.ConnConfig.DialFunc = (&net.Dialer{
+			LocalAddr: &net.TCPAddr{IP: net.IPv4zero},
+			KeepAlive: 30 * time.Second,
+			DualStack: false,
+		}).DialContext
+		conn, err := pgxpool.NewWithConfig(context.Background(), config)
 		if err != nil {
 			log.Fatalf("Error connecting to Postgre: %v", err)
 
