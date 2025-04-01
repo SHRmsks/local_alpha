@@ -2,4 +2,4 @@
 builder = "NIXPACKS"
 context = "backend"
 buildCommand = "cd backend && go mod tidy && go build -o out main.go"
-startCommand = "./backend/out"  
+startCommand = "./out"  
