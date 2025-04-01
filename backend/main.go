@@ -127,7 +127,7 @@ func main() {
 
 	/*backend Server*/
 	server := &http.Server{
-		Addr:    "0.0.0.0:" + port,
+		Addr:    ":" + port,
 		Handler: r,
 	}
 	var mongoClient *mongo.Client
