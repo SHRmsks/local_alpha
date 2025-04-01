@@ -296,6 +296,7 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	token, err := googleconfig.Exchange(context, tempCode)
 
 	if err != nil {
+		log.Println("err", err)
 		http.Error(w, "Error with Google Server1", http.StatusInternalServerError)
 		return
 	}
