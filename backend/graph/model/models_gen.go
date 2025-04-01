@@ -2,50 +2,257 @@
 
 package model
 
-type Company struct {
-	CompanyName string `json:"companyName"`
-	CompanyID   string `json:"companyID"`
-	Location    string `json:"location"`
-	Intro       string `json:"intro"`
-	Icon        string `json:"icon"`
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type User interface {
+	IsUser()
+	GetID() string
+	GetUsername() string
+	GetUserInfo() *UserInfo
 }
 
-type DashBoard struct {
-	User  *User  `json:"user"`
+type Comment struct {
+	CommentID   string       `json:"commentID"`
+	CommentInfo *CommentInfo `json:"commentInfo"`
+}
+
+type CommentInfo struct {
+	CommentID     string     `json:"commentID"`
+	CommentDate   string     `json:"commentDate"`
+	CommentBody   string     `json:"commentBody"`
+	CommentImages []string   `json:"commentImages,omitempty"`
+	ParentComment *Comment   `json:"parentComment,omitempty"`
+	Replies       []*Comment `json:"replies,omitempty"`
+	AuthorID      string     `json:"authorId"`
+	LikeCount     int32      `json:"likeCount"`
+	Likes         []string   `json:"likes,omitempty"`
+}
+
+type Company struct {
+	CompanyID   string       `json:"companyID"`
+	CompanyName string       `json:"companyName"`
+	CompanyInfo *CompanyInfo `json:"companyInfo"`
+}
+
+type CompanyInfo struct {
+	CompanyID      string       `json:"companyID"`
+	Location       string       `json:"location"`
+	Intro          string       `json:"intro"`
+	Icon           string       `json:"icon"`
+	FoundingYear   int32        `json:"foundingYear"`
+	CompanyUserID  string       `json:"companyUserID"`
+	CompanyUser    *CompanyUser `json:"companyUser"`
+	CompanyMembers []string     `json:"companyMembers"`
+}
+
+type CompanyUser struct {
+	ID        string    `json:"id"`
+	Username  string    `json:"username"`
+	UserInfo  *UserInfo `json:"userInfo"`
+	CompanyID string    `json:"companyID"`
+	Company   *Company  `json:"company"`
+}
+
+func (CompanyUser) IsUser()                     {}
+func (this CompanyUser) GetID() string          { return this.ID }
+func (this CompanyUser) GetUsername() string    { return this.Username }
+func (this CompanyUser) GetUserInfo() *UserInfo { return this.UserInfo }
+
+type Dashboard struct {
+	ID    string `json:"id"`
+	Owner User   `json:"owner"`
 	Title string `json:"title"`
 }
 
-type Follow struct {
-	UserID      string  `json:"userID"`
-	UsersFollow []*User `json:"usersFollow"`
+type GeneralUser struct {
+	ID                      string           `json:"id"`
+	Username                string           `json:"username"`
+	UserInfo                *UserInfo        `json:"userInfo"`
+	Education               *string          `json:"education,omitempty"`
+	Company                 *Company         `json:"company,omitempty"`
+	FocusAreas              []string         `json:"focusAreas"`
+	AreasOfInterest         []string         `json:"areasOfInterest"`
+	Skills                  []string         `json:"skills"`
+	AwardsAndCertifications []string         `json:"awardsAndCertifications,omitempty"`
+	Hobbies                 []string         `json:"hobbies,omitempty"`
+	Subscription            SubscriptionType `json:"subscription"`
+}
+
+func (GeneralUser) IsUser()                     {}
+func (this GeneralUser) GetID() string          { return this.ID }
+func (this GeneralUser) GetUsername() string    { return this.Username }
+func (this GeneralUser) GetUserInfo() *UserInfo { return this.UserInfo }
+
+type Group struct {
+	GroupID   string     `json:"groupID"`
+	GroupName string     `json:"groupName"`
+	GroupInfo *GroupInfo `json:"groupInfo"`
+}
+
+type GroupInfo struct {
+	GroupID      string     `json:"groupID"`
+	Intro        string     `json:"intro"`
+	Icon         string     `json:"icon"`
+	GroupUserID  string     `json:"groupUserID"`
+	GroupUser    *GroupUser `json:"groupUser"`
+	GroupMembers []string   `json:"groupMembers"`
+}
+
+type GroupUser struct {
+	ID       string    `json:"id"`
+	Username string    `json:"username"`
+	UserInfo *UserInfo `json:"userInfo"`
+	GroupID  string    `json:"groupID"`
+	Group    *Group    `json:"group"`
+}
+
+func (GroupUser) IsUser()                     {}
+func (this GroupUser) GetID() string          { return this.ID }
+func (this GroupUser) GetUsername() string    { return this.Username }
+func (this GroupUser) GetUserInfo() *UserInfo { return this.UserInfo }
+
+type Investment struct {
+	InvestmentID   string          `json:"investmentID"`
+	InvestmentName string          `json:"investmentName"`
+	InvestmentInfo *InvestmentInfo `json:"investmentInfo"`
+}
+
+type InvestmentInfo struct {
+	InvestmentID       string   `json:"investmentID"`
+	InvestmentDate     string   `json:"investmentDate"`
+	InvestmentAmount   float64  `json:"investmentAmount"`
+	InvestmentType     string   `json:"investmentType"`
+	InvestmentLocation string   `json:"investmentLocation"`
+	InvestmentStage    string   `json:"investmentStage"`
+	InvestmentImages   []string `json:"investmentImages,omitempty"`
+	CompanyID          *string  `json:"companyID,omitempty"`
+	Company            *Company `json:"company,omitempty"`
 }
 
 type Mutation struct {
-	Dashboard *DashBoard `json:"dashboard,omitempty"`
-}
-
-type Networks struct {
-	UserID   string     `json:"userID"`
-	Companys []*Company `json:"companys"`
 }
 
 type Post struct {
-	PostTitle string    `json:"postTitle"`
 	PostID    string    `json:"postID"`
-	PostUser  *User     `json:"postUser"`
-	UserID    string    `json:"userID"`
-	Body      string    `json:"body"`
-	Comments  []*string `json:"comments"`
-	Followers []*User   `json:"followers,omitempty"`
+	PostTitle string    `json:"postTitle"`
+	PostInfo  *PostInfo `json:"postInfo"`
+}
+
+type PostInfo struct {
+	PostID     string     `json:"postID"`
+	PostTitle  string     `json:"postTitle"`
+	PostDate   string     `json:"postDate"`
+	PostBody   string     `json:"postBody"`
+	PostImages []string   `json:"postImages,omitempty"`
+	Comments   []*Comment `json:"comments,omitempty"`
+	UserID     string     `json:"userID"`
+	LikeCount  int32      `json:"likeCount"`
+	Likes      []string   `json:"likes,omitempty"`
 }
 
 type Query struct {
 }
 
-type User struct {
-	Username       string    `json:"username"`
-	Occupation     *Company  `json:"occupation"`
-	CompanyFollows *Follow   `json:"companyFollows"`
-	Networks       *Networks `json:"networks"`
-	Posts          []*Post   `json:"posts"`
+type UserInfo struct {
+	UserID    string   `json:"userID"`
+	Icon      string   `json:"icon"`
+	Intro     *string  `json:"intro,omitempty"`
+	Groups    []*Group `json:"groups,omitempty"`
+	Posts     []*Post  `json:"posts,omitempty"`
+	Follows   []string `json:"follows,omitempty"`
+	Followers []string `json:"followers,omitempty"`
+}
+
+type VCFirm struct {
+	VcFirmID      string      `json:"vcFirmID"`
+	VcFirmName    string      `json:"vcFirmName"`
+	VcFirmMembers []*VCUser   `json:"vcFirmMembers"`
+	VcFirmInfo    *VCFirmInfo `json:"vcFirmInfo"`
+}
+
+type VCFirmInfo struct {
+	VcFirmID          string   `json:"vcFirmID"`
+	FoundedYear       int32    `json:"foundedYear"`
+	TotalFundsManaged float64  `json:"totalFundsManaged"`
+	InvestmentFocus   []string `json:"investmentFocus"`
+	Website           *string  `json:"website,omitempty"`
+}
+
+type VCNote struct {
+	NoteID     string   `json:"noteID"`
+	CompanyID  string   `json:"companyID"`
+	Company    *Company `json:"company"`
+	NoteDate   string   `json:"noteDate"`
+	NoteBody   string   `json:"noteBody"`
+	NoteImages []string `json:"noteImages,omitempty"`
+}
+
+type VCUser struct {
+	ID                      string        `json:"id"`
+	Username                string        `json:"username"`
+	UserInfo                *UserInfo     `json:"userInfo"`
+	CurrentInvestments      []*Investment `json:"currentInvestments,omitempty"`
+	ExitedInvestments       []*Investment `json:"exitedInvestments,omitempty"`
+	VcNotes                 []*VCNote     `json:"vcNotes,omitempty"`
+	VcFirmID                string        `json:"vcFirmID"`
+	VcFirm                  *VCFirm       `json:"vcFirm"`
+	Education               string        `json:"education"`
+	FocusAreas              []string      `json:"focusAreas"`
+	AreasOfInterest         []string      `json:"areasOfInterest"`
+	Skills                  []string      `json:"skills"`
+	AwardsAndCertifications []string      `json:"awardsAndCertifications,omitempty"`
+	Hobbies                 []string      `json:"hobbies,omitempty"`
+	FundsRaised             *float64      `json:"fundsRaised,omitempty"`
+}
+
+func (VCUser) IsUser()                     {}
+func (this VCUser) GetID() string          { return this.ID }
+func (this VCUser) GetUsername() string    { return this.Username }
+func (this VCUser) GetUserInfo() *UserInfo { return this.UserInfo }
+
+type SubscriptionType string
+
+const (
+	SubscriptionTypeFree    SubscriptionType = "FREE"
+	SubscriptionTypeBasic   SubscriptionType = "BASIC"
+	SubscriptionTypePremium SubscriptionType = "PREMIUM"
+)
+
+var AllSubscriptionType = []SubscriptionType{
+	SubscriptionTypeFree,
+	SubscriptionTypeBasic,
+	SubscriptionTypePremium,
+}
+
+func (e SubscriptionType) IsValid() bool {
+	switch e {
+	case SubscriptionTypeFree, SubscriptionTypeBasic, SubscriptionTypePremium:
+		return true
+	}
+	return false
+}
+
+func (e SubscriptionType) String() string {
+	return string(e)
+}
+
+func (e *SubscriptionType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SubscriptionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SubscriptionType", str)
+	}
+	return nil
+}
+
+func (e SubscriptionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
