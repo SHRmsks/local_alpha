@@ -262,7 +262,7 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 			SameSite: http.SameSiteNoneMode,
 
 			Secure: true,
-			Domain: "www.iperuranium.com",
+			Domain: ".iperuranium.com",
 		})
 	w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -359,7 +359,7 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   86400,
 			SameSite: http.SameSiteNoneMode,
 			Secure:   true,
-			Domain:   "www.iperuranium.com",
+			Domain:   ".iperuranium.com",
 		})
 	w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
