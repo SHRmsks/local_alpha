@@ -6,50 +6,15 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"log"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"iperuranium.com/backend/graph/model"
 )
 
-// CreateDashboard is the resolver for the createDashboard field.
-func (r *mutationResolver) CreateDashboard(ctx context.Context, title string) (*model.Dashboard, error) {
-	panic(fmt.Errorf("not implemented: CreateDashboard - createDashboard"))
-}
+// User is the resolver for the user field.
 
-// UpdateDashboard is the resolver for the updateDashboard field.
-func (r *mutationResolver) UpdateDashboard(ctx context.Context, id string, title string) (*model.Dashboard, error) {
-	panic(fmt.Errorf("not implemented: UpdateDashboard - updateDashboard"))
-}
-
-// DeleteDashboard is the resolver for the deleteDashboard field.
-func (r *mutationResolver) DeleteDashboard(ctx context.Context, id string) (*bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteDashboard - deleteDashboard"))
-}
-
-// Dashboard is the resolver for the dashboard field.
-func (r *queryResolver) Dashboard(ctx context.Context, id string) (*model.Dashboard, error) {
-	return &model.DashBoard{
-		Title: "test",
-	}, nil
-}
-
-// Mutation returns MutationResolver implementation.
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
-
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *dashBoardResolver) User(ctx context.Context, obj *model.DashBoard, id string) (*model.User, error) {
+func (r *dashBoardResolver) User(ctx context.Context, obj *model.DashBoard, id string) (*model.User, error) {
 	collection := r.Resolver.MongoDB.Database("GraphQL").Collection("user")
 	redisclient := r.Resolver.RedisClient
 	var usr model.User
@@ -70,6 +35,29 @@ type queryResolver struct{ *Resolver }
 	}
 	return &usr, nil
 }
+
+// Dashboard is the resolver for the dashboard field.
+func (r *queryResolver) Dashboard(ctx context.Context, id string) (*model.DashBoard, error) {
+	return &model.DashBoard{
+		Title: "test",
+	}, nil
+}
+
+// DashBoard returns DashBoardResolver implementation.
 func (r *Resolver) DashBoard() DashBoardResolver { return &dashBoardResolver{r} }
+
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+
 type dashBoardResolver struct{ *Resolver }
-*/
+type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+
+ */
