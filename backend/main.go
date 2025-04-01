@@ -33,6 +33,11 @@ func heartbeats(pool *pgxpool.Pool, ctx context.Context, redisclient *redis.Clie
 		log.Panicln("Database down, ", err)
 		return
 	}
+	err1 := redisclient.Ping(ctx).Err()
+	if err1 != nil {
+		log.Panicln("Redis down, ", err)
+		return
+	}
 	for range timeout.C {
 		select {
 		case <-ctx.Done():
@@ -40,8 +45,9 @@ func heartbeats(pool *pgxpool.Pool, ctx context.Context, redisclient *redis.Clie
 			return
 		default:
 			_, err := pool.Query(ctx, "SELECT 1")
-			if err != nil {
-				log.Fatalln("Database down, ", err)
+			err1 := redisclient.Ping(ctx).Err()
+			if err != nil || err1 != nil {
+				log.Fatalln("Database down, ", err, err1)
 			} else {
 				log.Println("sending Heartbeats successfully", timeout.C)
 			}
