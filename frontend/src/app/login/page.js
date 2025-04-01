@@ -17,7 +17,7 @@ export default function Login() {
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     ux_mode: "redirect",
-    redirect_uri: "http://localhost:5050/callback",
+    redirect_uri: "http://api.iperuranium.com/callback",
     onSuccess: (tokenResponse) => console.log(tokenResponse),
   });
 
@@ -25,7 +25,7 @@ export default function Login() {
     const uuid = uuidv4();
     const clientId = "77nme6nzlhmnlv";
     const scope = "openid profile email";
-    const redirectUri = "http://localhost:5050/linkedin/callback";
+    const redirectUri = "http://api.iperuranium.com/linkedin/callback";
     window.location.href = encodeURI(
       `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${uuid}`
     );
@@ -43,7 +43,7 @@ export default function Login() {
         userName: emailValue.toString().trim(),
         password: passwordValue.toString().trim(),
       });
-      fetch("http://localhost:5050/login", {
+      fetch("http://api.iperuranium.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

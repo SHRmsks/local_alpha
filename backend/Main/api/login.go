@@ -280,7 +280,7 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	var googleconfig = &oauth2.Config{
 		ClientID:     "70931151165-akujq6qnfukkn66heiuj51lfju7lvnod.apps.googleusercontent.com",
 		ClientSecret: h.googleClientSecret,
-		RedirectURL:  "http://localhost:5050/callback",
+		RedirectURL:  "http://api.iperuranium.com/callback",
 		Endpoint:     google.Endpoint,
 		Scopes:       []string{"openid", "profile", "email"},
 	}
