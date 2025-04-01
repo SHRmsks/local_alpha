@@ -32,7 +32,7 @@ type AuroraSecret struct {
 	DBName   string `json:"dbname"`
 }
 
-func heartbeats(pool *pgxpool.Pool, ctx context.Context) {
+func heartbeats(pool *pgxpool.Pool, ctx context.Context, redisclient redis) {
 	timeout := time.NewTicker(10 * time.Minute)
 	log.Println("called heartbeats")
 	defer timeout.Stop()
@@ -77,10 +77,8 @@ func main() {
 	googleClientSecret := os.Getenv("googleClientSecret")
 	linkedinClientSecret := os.Getenv("linkedinClientSecret")
 	redisAddr := os.Getenv("redisAddr")
-	redisPass := os.Getenv("redisPassword")
 
 	r := chi.NewRouter()
-
 	/*backend Server*/
 	server := &http.Server{
 		Addr:    ":" + port,
@@ -91,20 +89,20 @@ func main() {
 	var pgPool *pgxpool.Pool
 	var wg sync.WaitGroup
 	wg.Add(3)
-	done := make(chan struct{})
+	errorChan := make(chan error, 3)
 	var timeout = time.After(45 * time.Second)
+
 	var rdb *redis.Client
 	go func() {
 		defer wg.Done()
-		rdb = redis.NewClient(&redis.Options{
-			Addr:         redisAddr,
-			Password:     redisPass,
-			DB:           0,
-			DialTimeout:  10 * time.Second,
-			ReadTimeout:  10 * time.Second,
-			WriteTimeout: 20 * time.Second,
-		})
-
+		opt, err := redis.ParseURL(redisAddr)
+		if err != nil {
+			errorChan <- err
+		}
+		rdb = redis.NewClient(opt)
+		if err1 := rdb.Ping(context.Background()).Err(); err1 != nil {
+			errorChan <- err1
+		}
 	}()
 
 	// Initialize mongo db database
@@ -115,7 +113,7 @@ func main() {
 
 		client, errMongo := mongo.Connect(contxt, options.Client().ApplyURI(Mongodb))
 		if errMongo != nil {
-			log.Fatalf("Error connecting to Mongodb: %v", err)
+			log.Printf("Error connecting to Mongodb: %v", err)
 			return
 		}
 		mongoClient = client
@@ -131,27 +129,25 @@ func main() {
 		}).DialContext
 		conn, err := pgxpool.NewWithConfig(context.Background(), config)
 		if err != nil {
-			log.Fatalf("Error connecting to Postgre: %v", err)
-
-			return
-
+			errorChan <- err
 		}
 		pgPool = conn
-		go heartbeats(pgPool, context.Background())
 
 	}()
 	go func() {
-		wg.Wait()
-		close(done)
+		for err := range errorChan {
+			log.Fatalln("error on initializing services", err)
+		}
 	}()
 
-	select {
-	case <-done:
+	go func() {
+		wg.Wait()
+		close(errorChan)
 		log.Println("connections all Successful")
+		go heartbeats(pgPool, context.Background(), rdb)
 
-	case <-timeout:
-		log.Fatalf("Connection to Database timed out")
-	}
+	}()
+
 	mongoSession, err := mongoClient.StartSession()
 	if err != nil {
 		log.Fatalf("Having trouble starting mongo Session")
