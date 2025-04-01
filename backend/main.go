@@ -253,7 +253,7 @@ func main() {
 
 	// main routes
 
-	log.Println("Server is running on port", port)
+	log.Println("debugger Server is running on port", server.Addr)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server failed: %v", err)
 	}
