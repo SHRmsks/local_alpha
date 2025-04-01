@@ -14,9 +14,12 @@
     "nanoid": "^3.3.4",
     "next": "15.2.0",
     "react": "^19.0.0",
+    "react-confetti": "^6.4.0",
+    "react-confetti-boom": "^1.1.2",
     "react-dom": "^19.0.0",
-    "react-window": "^1.8.11",
     "react-infinite-scroll-component": "^6.1.0",
+    "react-loading-skeleton": "^3.5.0",
+    "react-window": "^1.8.11",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

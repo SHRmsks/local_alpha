@@ -1,0 +1,5 @@
+[build]
+builder = "NIXPACKS"
+
+buildCommand = "cd backend && go mod tidy && go build -o /app/out main.go && cp .env /app/&& ls -lah /app/out"
+startCommand = "./out"  
