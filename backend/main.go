@@ -153,6 +153,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			case <-done:
+				log.Println("database connected sucessfully")
 				go heartbeats(pgPool, ctx, rdb)
 				return
 			}
