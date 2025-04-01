@@ -24,15 +24,7 @@ import (
 	graph "iperuranium.com/backend/graph"
 )
 
-type AuroraSecret struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	DBName   string `json:"dbname"`
-}
-
-func heartbeats(pool *pgxpool.Pool, ctx context.Context, redisclient redis) {
+func heartbeats(pool *pgxpool.Pool, ctx context.Context, redisclient *redis.Client) {
 	timeout := time.NewTicker(10 * time.Minute)
 	log.Println("called heartbeats")
 	defer timeout.Stop()
@@ -59,6 +51,9 @@ func heartbeats(pool *pgxpool.Pool, ctx context.Context, redisclient redis) {
 	}
 }
 func main() {
+	//main func context gloabl
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	// load configuration
 	err := godotenv.Load()
 	if err != nil {
@@ -66,33 +61,32 @@ func main() {
 	}
 	log.Println("Environment variables loaded successfully")
 
-	port := os.Getenv("PORT") // backend port
-	apiPort := os.Getenv("apiPORT")
-	frontEND_PORT := os.Getenv("FRONTEND_PORT")
+	port := os.Getenv("PORT")                   // backend port
+	apiPort := os.Getenv("apiPORT")             // prod backend port
+	frontEND_PORT := os.Getenv("FRONTEND_PORT") // local frontend
 	// log.Println("frontend port: ", frontEND_PORT)
-	domainName := os.Getenv("DomainName")
+	domainName := os.Getenv("DomainName")                     // main domain
+	Mongodb := os.Getenv("DBURL")                             //mongo db url
+	PSQLURL := os.Getenv("PSQLURL")                           // psql url
+	redisAddr := os.Getenv("redisAddr")                       // redis url
+	googleClientSecret := os.Getenv("googleClientSecret")     // google oauth secret
+	linkedinClientSecret := os.Getenv("linkedinClientSecret") // linkedin oauth
 
-	Mongodb := os.Getenv("DBURL")
-	PSQLURL := os.Getenv("PSQLURL")
-	googleClientSecret := os.Getenv("googleClientSecret")
-	linkedinClientSecret := os.Getenv("linkedinClientSecret")
-	redisAddr := os.Getenv("redisAddr")
-
-	r := chi.NewRouter()
+	/************************************************************************/
 	/*backend Server*/
+	r := chi.NewRouter()
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: r,
 	}
 	var mongoClient *mongo.Client
-
 	var pgPool *pgxpool.Pool
+	var rdb *redis.Client
 	var wg sync.WaitGroup
 	wg.Add(3)
+	timeout := time.Duration(30 * time.Second)
 	errorChan := make(chan error, 3)
-	var timeout = time.After(45 * time.Second)
-
-	var rdb *redis.Client
+	done := make(chan struct{})
 	go func() {
 		defer wg.Done()
 		opt, err := redis.ParseURL(redisAddr)
@@ -103,9 +97,8 @@ func main() {
 		if err1 := rdb.Ping(context.Background()).Err(); err1 != nil {
 			errorChan <- err1
 		}
-	}()
+	}() // redis go routinue initialized
 
-	// Initialize mongo db database
 	go func() {
 		defer wg.Done()
 		contxt, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -117,10 +110,10 @@ func main() {
 			return
 		}
 		mongoClient = client
-	}()
+	}() // mongodb initialized
+
 	go func() {
 		defer wg.Done()
-
 		config, _ := pgxpool.ParseConfig(PSQLURL)
 		config.ConnConfig.DialFunc = (&net.Dialer{
 			LocalAddr: &net.TCPAddr{IP: net.IPv4zero},
@@ -133,7 +126,7 @@ func main() {
 		}
 		pgPool = conn
 
-	}()
+	}() // initialize psql db
 	go func() {
 		for err := range errorChan {
 			log.Fatalln("error on initializing services", err)
@@ -141,13 +134,24 @@ func main() {
 	}()
 
 	go func() {
-		wg.Wait()
-		close(errorChan)
-		log.Println("connections all Successful")
-		go heartbeats(pgPool, context.Background(), rdb)
+		for {
+			select {
+			case <-time.After(timeout):
+				log.Fatal("connection to db timed out")
+			case <-ctx.Done():
+				return
+			case <-done:
+				go heartbeats(pgPool, context.Background(), rdb)
+				return
+			}
+
+		}
 
 	}()
 
+	wg.Wait()
+	close(done)
+	close(errorChan)
 	mongoSession, err := mongoClient.StartSession()
 	if err != nil {
 		log.Fatalf("Having trouble starting mongo Session")
