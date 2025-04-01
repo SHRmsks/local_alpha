@@ -172,7 +172,7 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 		ClientID:     "77nme6nzlhmnlv",
 		ClientSecret: h.linkedinClientSecret,
 		Scopes:       []string{"openid", "profile", "email"},
-		RedirectURL:  "http://localhost:5050/linkedin/callback",
+		RedirectURL:  "http://api.iperuranium/linkedin/callback",
 		Endpoint: oauth2.Endpoint{
 			AuthURL:   "https://www.linkedin.com/oauth/v2/authorization",
 			TokenURL:  "https://www.linkedin.com/oauth/v2/accessToken",
@@ -259,9 +259,9 @@ func (h *DBInfo) LinkedInCallbackHandler(w http.ResponseWriter, r *http.Request)
 			Path:     "/",
 			HttpOnly: true,
 			MaxAge:   86400,
-			// SameSite: http.SameSiteNoneMode,
-			SameSite: http.SameSiteLaxMode,
-			// Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+
+			Secure: true,
 			Domain: "www.iperuranium.com",
 		})
 	w.Header().Set("Access-Control-Allow-Origin", frontendURL)
@@ -356,9 +356,9 @@ func (h *DBInfo) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 			Path:     "/",
 			MaxAge:   86400,
-			SameSite: http.SameSiteLaxMode,
-			// Secure:   true,
-			Domain: "www.iperuranium.com",
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
+			Domain:   "www.iperuranium.com",
 		})
 	w.Header().Set("Access-Control-Allow-Origin", frontendURL)
 	w.Header().Set("Access-Control-Allow-Credentials", "true")

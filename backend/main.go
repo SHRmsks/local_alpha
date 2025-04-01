@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"log"
@@ -10,13 +9,6 @@ import (
 	"os"
 	"sync"
 	"time"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
-
-	awsConfig "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -40,64 +32,6 @@ type AuroraSecret struct {
 	DBName   string `json:"dbname"`
 }
 
-func getAuroraCredentials(secretName, region string) (*AuroraSecret, error) {
-	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
-	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	ctxt := context.Background()
-	cfg, err := awsConfig.LoadDefaultConfig(ctxt, awsConfig.WithRegion(region), config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")))
-	if err != nil {
-		log.Fatal("error on loading Aurora config ", err)
-	}
-	log.Printf("AWS config loaded successfully for region: %s", region)
-
-	smClient := secretsmanager.NewFromConfig(cfg)
-	input := &secretsmanager.GetSecretValueInput{
-		SecretId:     aws.String(secretName),
-		VersionStage: aws.String("AWSCURRENT"),
-	}
-
-	result, err := smClient.GetSecretValue(ctxt, input)
-	if err != nil {
-		log.Printf("failed to retrieve secret %s in region %s: %v", secretName, region, err)
-		return nil, fmt.Errorf("failed to retrieve secret: %w", err)
-	}
-	var secret AuroraSecret
-	err = json.Unmarshal([]byte(*result.SecretString), &secret)
-	if err != nil {
-		log.Printf("failed to unmarshal secret string for secret %s: %v", secretName, err)
-		return nil, fmt.Errorf("failed to unmarshal secret string: %w", err)
-	}
-	log.Printf("Secret %s retrieved and unmarshaled successfully", secretName)
-	return &secret, nil
-}
-
-func connectToAurora(secretName, region string) (*pgxpool.Pool, error) {
-	secret, err := getAuroraCredentials(secretName, region)
-	if err != nil {
-		return nil, err
-	}
-
-	// Build connection string in the PostgreSQL URL format.
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
-		secret.Username,
-		secret.Password,
-		secret.Host,
-		secret.Port,
-		secret.DBName,
-	)
-
-	// Create a connection pool with a timeout context.
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	pool, err := pgxpool.New(ctx, connStr)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create connection pool: %w", err)
-	}
-
-	return pool, nil
-}
-
 func main() {
 	// load configuration
 	err := godotenv.Load()
@@ -107,17 +41,13 @@ func main() {
 	log.Println("Environment variables loaded successfully")
 
 	port := os.Getenv("PORT") // backend port
-
+	apiPort := os.Getenv("apiPORT")
 	frontEND_PORT := os.Getenv("FRONTEND_PORT")
 	// log.Println("frontend port: ", frontEND_PORT)
 	domainName := os.Getenv("DomainName")
-	// go rountine to initilize the database
-	/*all the credentials we needed */
-	AuroraSecretName := os.Getenv("ArScrtNm")
-	region := "us-east-1"
 
 	Mongodb := os.Getenv("DBURL")
-
+	PSQLURL := os.Getenv("PSQLURL")
 	googleClientSecret := os.Getenv("googleClientSecret")
 	linkedinClientSecret := os.Getenv("linkedinClientSecret")
 	redisAddr := os.Getenv("redisAddr")
@@ -131,8 +61,8 @@ func main() {
 		Handler: r,
 	}
 	var mongoClient *mongo.Client
-	var psqlClient *pgxpool.Pool
 
+	var pgPool *pgxpool.Pool
 	var wg sync.WaitGroup
 	wg.Add(3)
 	done := make(chan struct{})
@@ -166,15 +96,15 @@ func main() {
 	go func() {
 		defer wg.Done()
 
-		conn, err := connectToAurora(AuroraSecretName, region)
-
+		conn, err := pgxpool.New(context.Background(), PSQLURL)
 		if err != nil {
 			log.Fatalf("Error connecting to Postgre: %v", err)
 
 			return
 
 		}
-		psqlClient = conn
+		pgPool = conn
+
 	}()
 	go func() {
 		wg.Wait()
@@ -193,13 +123,13 @@ func main() {
 		log.Fatalf("Having trouble starting mongo Session")
 	}
 	gqlResolver := &graph.Resolver{
-		PsqlPool:     psqlClient,
+		PsqlPool:     pgPool,
 		MongoDB:      mongoClient,
 		MongoSession: &mongoSession,
 		RedisClient:  rdb,
 	}
 
-	DBinfo := Api.LoginInfo(mongoClient.Database("User"), psqlClient, &mongoSession, googleClientSecret, linkedinClientSecret)
+	DBinfo := Api.LoginInfo(mongoClient.Database("User"), pgPool, &mongoSession, googleClientSecret, linkedinClientSecret)
 	executableSchema := graph.NewExecutableSchema(graph.Config{
 		Resolvers: gqlResolver,
 	})
@@ -225,7 +155,7 @@ func main() {
 		func(privateURL chi.Router) {
 			privateURL.Use(cors.Handler(
 				cors.Options{
-					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)},
+					AllowedOrigins:   []string{fmt.Sprintf("https://%v.com", domainName), fmt.Sprintf("https://%v.com", apiPort), fmt.Sprintf("http://localhost:%v", frontEND_PORT), fmt.Sprintf("http://localhost:%v", port)},
 					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 					AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization", "X-CSRF-Token"},
 					AllowCredentials: true,
