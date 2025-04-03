@@ -27,15 +27,17 @@ import (
 func heartbeats(pool *pgxpool.Pool, ctx context.Context, redisclient *redis.Client) {
 	timeout := time.NewTicker(10 * time.Minute)
 	log.Println("called heartbeats")
+	contxt, cancel := context.WithTimeout(ctx, time.Duration(10*time.Second))
+	defer cancel()
 	defer timeout.Stop()
-	_, err := pool.Query(ctx, "SELECT 1")
+	_, err := pool.Query(contxt, "SELECT 1")
 	if err != nil {
-		log.Panicln("Database down, ", err)
+		log.Fatalln("Database down, ", err)
 		return
 	}
-	err1 := redisclient.Ping(ctx).Err()
+	err1 := redisclient.Ping(contxt).Err()
 	if err1 != nil {
-		log.Panicln("Redis down, ", err)
+		log.Fatalln("Redis down, ", err)
 		return
 	}
 	for range timeout.C {
@@ -44,10 +46,13 @@ func heartbeats(pool *pgxpool.Pool, ctx context.Context, redisclient *redis.Clie
 			log.Println("shutting down gracefully")
 			return
 		default:
-			_, err := pool.Query(ctx, "SELECT 1")
-			err1 := redisclient.Ping(ctx).Err()
+			newCxt, cancel1 := context.WithTimeout(ctx, time.Duration(10*time.Second))
+			defer cancel1()
+			_, err := pool.Query(newCxt, "SELECT 1")
+			err1 := redisclient.Ping(newCxt).Err()
 			if err != nil || err1 != nil {
 				log.Fatalln("Database down, ", err, err1)
+				return
 			} else {
 				log.Println("sending Heartbeats successfully", timeout.C)
 			}
