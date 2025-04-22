@@ -1,23 +1,29 @@
 "use client";
+import dynamic from "next/dynamic";
 
 import "@/app/globals.css";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import Image from "next/image";
 import logo from "@/../public/assets/login-page-logo.svg";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import logoGoogle from "@/../public/assets/logo-google.svg";
 import logoLinkedin from "@/../public/assets/logo-linkedin.svg";
 import { useGoogleLogin } from "@react-oauth/google";
 import Blobs from "@/components/blobs/blobs";
 import { v4 as uuidv4 } from "uuid";
 
+import loginEye from "@pub/animation/loginEye.json";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+
 export default function Login() {
   const router = useRouter();
+  const eyeRef = useRef(null);
   // fetching the oauth
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     ux_mode: "redirect",
-    redirect_uri: "https://api.iperuranium.com/callback",
+    redirect_uri: "http://localhost:5050/callback",
     onSuccess: (tokenResponse) => console.log(tokenResponse),
   });
 
@@ -105,7 +111,17 @@ export default function Login() {
           />
         </div>
         <div className="w-full flex flex-col gap-1">
-          <p className="text-sm">PASSWORD</p>
+          <div className="flex relative w-full flex-row gap-x-1 items-center ">
+            <p className="text-sm w-fit">PASSWORD</p>
+        
+            <Lottie
+              className="w-[20px] h-[20px]"
+             
+              animationData={loginEye}
+              autoplay={true}
+              loop={true}
+            />
+          </div>
           <input
             value={passwordValue}
             onChange={(evt) => setPasswordValue(evt.target.value)}

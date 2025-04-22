@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.13.4",
     "@react-oauth/google": "^0.12.1",
+    "lottie-react": "^2.4.1",
     "motion": "^12.5.0",
     "nanoid": "^3.3.4",
-    "next": "15.2.0",
+    "next": "^15.2.4",
     "react": "^19.0.0",
     "react-confetti": "^6.4.0",
     "react-confetti-boom": "^1.1.2",
